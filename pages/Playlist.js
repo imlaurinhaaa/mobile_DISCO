@@ -37,7 +37,6 @@ export default function Playlist() {
                 return Math.abs(gestureState.dy) > 5 && gestureState.dy > 0;
             },
             onPanResponderGrant: () => {
-                // Interrompe qualquer animação em curso
                 translateY.stopAnimation();
             },
             onPanResponderMove: (evt, gestureState) => {
@@ -47,7 +46,6 @@ export default function Playlist() {
             },
             onPanResponderRelease: (evt, gestureState) => {
                 if (gestureState.dy > 100 || gestureState.vy > 0.5) {
-                    // Fechar o modal com animação
                     Animated.timing(translateY, {
                         toValue: height,
                         duration: 300,
@@ -56,7 +54,6 @@ export default function Playlist() {
                         closeModal();
                     });
                 } else {
-                    // Retornar à posição original
                     Animated.spring(translateY, {
                         toValue: 0,
                         tension: 100,
