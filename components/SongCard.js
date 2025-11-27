@@ -1,16 +1,24 @@
-import React from "react";
+import React, { useState } from "react";
 import {
     View,
     Text,
-    ImageBackground,
     TouchableOpacity,
     StyleSheet,
     Image
 } from "react-native";
 import Feather from '@expo/vector-icons/Feather';
-import Entypo from '@expo/vector-icons/Entypo';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
-export default function SongCard({ title, duration, artist }) {
+export default function SongCard({ id, title, duration, artist }) {
+    const [likedSongs, setLikedSongs] = useState({});
+
+    const toggleLike = (songId) => {
+        setLikedSongs((prev) => ({
+            ...prev,
+            [songId]: !prev[songId],
+        }));
+    };
+
     return (
         <View style={styles.songCard}>
             <Image source={require('../assets/background.png')} style={styles.songImage} />
@@ -20,8 +28,12 @@ export default function SongCard({ title, duration, artist }) {
                 <Text style={styles.songArtist}>{artist}</Text>
             </View>
             <View style={styles.songOptions}>
-                <TouchableOpacity>
-                    <Entypo name="heart-outlined" size={30} color="white" />
+                <TouchableOpacity onPress={() => toggleLike(id)}>
+                    <FontAwesome
+                        name={likedSongs[id] ? 'heart' : 'heart-o'}
+                        size={24}
+                        color={likedSongs[id] ? 'red' : 'white'}
+                    />
                 </TouchableOpacity>
                 <TouchableOpacity>
                     <Feather name="more-vertical" size={24} color="white" />
