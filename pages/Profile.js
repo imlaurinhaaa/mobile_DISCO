@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView, Text, Image, TouchableOpacity, FlatList, Button } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, Image, TouchableOpacity, FlatList } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Defs, RadialGradient, Stop, Rect } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
@@ -73,31 +73,31 @@ export default function Profile() {
                     <Rect x="0" y="0" width="420" height="420" rx="210" fill="url(#radial)" />
                 </Svg>
                 <ScrollView>
-                <View style={styles.profileHeader}>
-                    <Image source={{ uri: user.photo }} style={styles.profileImage} />
-                    <Text style={styles.profileName}>Hi, <Text style={styles.profileNameBold}>{user.name}</Text></Text>
-                </View>
+                    <View style={styles.profileHeader}>
+                        <Image source={{ uri: user.photo }} style={styles.profileImage} />
+                        <Text style={styles.profileName}>Hi, <Text style={styles.profileNameBold}>{user.name}</Text></Text>
+                    </View>
 
-                <View style={styles.Favssection}>
-                    <Text style={styles.sectionTitle}>Suas favoritas</Text>
-                    <FlatList
-                        data={favorites}
-                        renderItem={renderFavorite}
-                        keyExtractor={(item) => item.id}
-                    />
-                </View>
+                    <View style={styles.Favssection}>
+                        <Text style={styles.sectionTitle}>Suas favoritas</Text>
+                        <FlatList
+                            data={favorites}
+                            renderItem={renderFavorite}
+                            keyExtractor={(item) => item.id}
+                        />
+                    </View>
 
-                <View style={styles.playlistsSection}>
-                    <Text style={styles.sectionTitle}>Suas playlists</Text>
-                    <FlatList
-                        data={playlists}
-                        renderItem={renderPlaylist}
-                        keyExtractor={(item) => item.id}
-                    />
-                    <Button style={styles.createPlaylistButton}>
-                        <Ionicons name="add" size={24} color="#000000ff" />
-                    </Button>
-                </View>
+                    <View style={styles.playlistsSection}>
+                        <Text style={styles.sectionTitle}>Suas playlists</Text>
+                        <FlatList
+                            data={playlists}
+                            renderItem={renderPlaylist}
+                            keyExtractor={(item) => item.id}
+                        />
+                        <TouchableOpacity style={styles.createPlaylistButton} onPress={() => console.log('Criar playlist')}>
+                            <Ionicons name="add" size={24} color="#000000ff" />
+                        </TouchableOpacity>
+                    </View>
                 </ScrollView>
             </SafeAreaView>
         </SafeAreaProvider>
@@ -126,15 +126,15 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
         marginBottom: 24,
     },
-    profileImage:{
+    profileImage: {
         width: 70,
         height: 70,
         borderRadius: 100,
     },
-    profileName:{
+    profileName: {
         color: '#fff',
     },
-    profileNameBold:{
+    profileNameBold: {
         fontWeight: 'bold',
         fontSize: 18,
     },
@@ -156,4 +156,4 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 20,
     },
-  });
+});
