@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'; // Adicionado MaterialCommunityIcons
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 import axios from 'axios';
@@ -11,15 +11,14 @@ export default function SongsDetails() {
     const navigation = useNavigation();
     const {apiUrl} = Constants.expoConfig.extra;
     
-    // Verificação de segurança: Se não houver params, define valores padrão ou retorna null
     const { song, apiImg } = route.params || {}; 
 
-    const [songDetails, setSongDetails] = useState(null); // Estado para detalhes adicionais se necessário
+    const [songDetails, setSongDetails] = useState(null);
 
     useEffect(() => {
         if (song?.id) {
             console.log("ID da música recebida:", song.id);
-            a    
+            axios.get(`${apiUrl}songs/${song.id}`)
                 .then((response) => {
                     console.log("Detalhes da música recebidos:", response.data);
                     setSongDetails(response.data);
@@ -30,13 +29,12 @@ export default function SongsDetails() {
         }
     }, [song]);
 
-    // Se não tiver música carregada, mostra loading ou volta
     if (!song) {
         return (
             <View style={styles.container}>
-                <Text style={{textAlign: 'center', marginTop: 50}}>Nenhuma música selecionada.</Text>
+                <Text style={{textAlign: 'center', marginTop: 50, color: '#fff'}}>Nenhuma música selecionada.</Text>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={{alignItems:'center', marginTop: 20}}>
-                    <Text style={{color: 'blue'}}>Voltar</Text>
+                    <Text style={{color: '#8000ff'}}>Voltar</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -44,7 +42,6 @@ export default function SongsDetails() {
 
     return (
         <ScrollView style={styles.container}>
-            {/* ...existing code... */}
             <View style={styles.header}>
                 <TouchableOpacity
                     style={styles.backButton}
@@ -52,51 +49,58 @@ export default function SongsDetails() {
                 >
                     <MaterialCommunityIcons
                         name="arrow-left-circle"
-                        size={36}
-                        color="#8000ff"
+                        size={40}
+                        color="#fff"
                     />
                 </TouchableOpacity>
-                {/* Verificação segura para album_id */}
-                <Text style={styles.headerTitle}>{song.album_id?.title || "Detalhes"}</Text>
+                <Text style={styles.headerTitle}>{song.album_id?.title || "Álbum"}</Text>
             </View>
+
             <View style={styles.content}>
                 <View style={styles.imageContainer}>
-                {/* Verificação segura para imagem */}
-                <Image 
-                    source={{ uri: song.album_id?.photo_disk ? `${apiImg}${song.album_id.photo_disk}` : 'https://placehold.co/200' }} 
-                    style={styles.image} 
-                />
+                    <Image 
+                        source={{ uri: song.album_id?.photo_disk ? `${apiImg}${song.album_id.photo_disk}` : 'https://placehold.co/300' }} 
+                        style={styles.image} 
+                    />
                 </View>
 
                 <View style={styles.songHeader}>
-                <View style={styles.infoContainer}>
-                    <Text style={styles.title}>{song.title}</Text>
-                    <Text style={styles.artist}>Artista: {song.singer_id?.name || "Desconhecido"}</Text>
+                    <View style={styles.infoContainer}>
+                        <Text style={styles.title}>{song.title}</Text>
+                        <Text style={styles.artist}>{song.singer_id?.name || "Artista"}</Text>
+                    </View>
+
+                    <View style={styles.interactContainer}>
+                        <TouchableOpacity style={styles.iconButton}>
+                            <Ionicons name="add-circle-outline" size={32} color="#fff" />
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.iconButton}>
+                            <Ionicons name="heart-outline" size={32} color="#fff" />
+                        </TouchableOpacity>
+                    </View>
                 </View>
 
-                <View style={styles.interactContainer}>
-                    <TouchableOpacity style={styles.likeButton}>
-                        <Ionicons name="heart-outline" size={28} color="#8000ff" />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.addButton}>
-                        <Ionicons name="add-circle-outline" size={28} color="#8000ff" />
-                    </TouchableOpacity>
-                </View>
+                <View style={styles.progressContainer}>
+                    <View style={styles.progressBar}>
+                        <View style={styles.progressFill} />
+                    </View>
+                    <Text style={styles.timeText}>{song.time || "00:00"}</Text>
                 </View>
 
-                <View style={styles.timeContainer}>
-                <View style={styles.line} />
-                <Text style={styles.timeText}>{song.time}</Text>
+                <View style={styles.playButtonContainer}>
+                    <TouchableOpacity style={styles.playButton}>
+                        <Ionicons name="play" size={40} color="#fff" />
+                    </TouchableOpacity>
                 </View>
 
                 <View style={styles.lyricsContainer}>
-                <Text style={styles.lyricsTitle}>Letra</Text>
-                <Text style={styles.lyricsText}>{song.lyrics}</Text>
+                    <Text style={styles.sectionTitle}>LETRA</Text>
+                    <Text style={styles.lyricsText}>{song.lyrics || "Letra não disponível"}</Text>
                 </View>
 
                 <View style={styles.descriptionContainer}>
-                <Text style={styles.descriptionTitle}>Descrição</Text>
-                <Text style={styles.descriptionText}>{song.description}</Text>
+                    <Text style={styles.sectionTitle}>DESCRIÇÃO</Text>
+                    <Text style={styles.descriptionText}>{song.description || ""}</Text>
                 </View>
             </View>
         </ScrollView>
@@ -106,108 +110,128 @@ export default function SongsDetails() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: '#0a0a2e',
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ddd',
+        paddingHorizontal: 20,
+        paddingTop: 50,
+        paddingBottom: 20,
     },
     backButton: {
         marginRight: 16,
     },
     headerTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#8000ff',
+        fontSize: 18,
+        fontWeight: '400',
+        color: '#fff',
+        flex: 1,
+        textAlign: 'center',
+        marginRight: 40,
     },
     content: {
-        padding: 16,
+        paddingHorizontal: 30,
     },
     imageContainer: {
         alignItems: 'center',
-        marginBottom: 16,
+        marginBottom: 24,
     },
     image: {
-        width: 200,
-        height: 200,
-        borderRadius: 8,
-        backgroundColor: '#eee',
+        width: 300,
+        height: 300,
+        borderRadius: 16,
+        backgroundColor: '#1a1a3e',
     },
     songHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 16,
+        marginBottom: 20,
     },
     infoContainer: {
         flex: 1,
     },
     title: {
-        fontSize: 24,
+        fontSize: 28,
         fontWeight: 'bold',
         marginBottom: 4,
-        color: '#333',
+        color: '#fff',
+        textTransform: 'uppercase',
     },
     artist: {
         fontSize: 16,
-        color: '#666',
+        color: '#999',
     },
     interactContainer: {
         flexDirection: 'row',
+        gap: 16,
     },
-    likeButton: {
-        marginRight: 16,
+    iconButton: {
+        marginLeft: 8,
     },
-    addButton: {},
-    timeContainer: {
-        alignItems: 'center',
-        marginBottom: 16,
+    progressContainer: {
+        marginBottom: 20,
     },
-    line: {
+    progressBar: {
         width: '100%',
-        height: 1,
-        backgroundColor: '#ddd',
+        height: 4,
+        backgroundColor: '#1a1a3e',
+        borderRadius: 2,
         marginBottom: 8,
+    },
+    progressFill: {
+        width: '40%',
+        height: '100%',
+        backgroundColor: '#8000ff',
+        borderRadius: 2,
     },
     timeText: { 
         fontSize: 14, 
-        color: '#666', 
-        marginBottom: 8
+        color: '#999',
+        textAlign: 'right',
     },
-    waveform: {
-        width: '100%',
-        height: 50,
-        resizeMode: 'contain',
+    playButtonContainer: {
+        alignItems: 'center',
+        marginVertical: 24,
+    },
+    playButton: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        backgroundColor: 'transparent',
+        borderWidth: 3,
+        borderColor: '#fff',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     lyricsContainer: {
-        marginBottom: 16,
+        backgroundColor: '#f5f5f5',
+        borderRadius: 16,
+        padding: 20,
+        marginBottom: 20,
     },
-    lyricsTitle: {
-        fontSize: 20,
+    sectionTitle: {
+        fontSize: 18,
         fontWeight: 'bold',
-        marginBottom: 8,
-        color: '#333',
+        marginBottom: 12,
+        color: '#0a0a2e',
+        letterSpacing: 1,
     },
     lyricsText: {
-        fontSize: 16,
-        color: '#666',
-        lineHeight: 22,
+        fontSize: 15,
+        color: '#333',
+        lineHeight: 24,
     },
     descriptionContainer: {
-        marginBottom: 16,
-    },
-    descriptionTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 8,
-        color: '#333',
+        backgroundColor: '#f5f5f5',
+        borderRadius: 16,
+        padding: 20,
+        marginBottom: 40,
     },
     descriptionText: {
-        fontSize: 16,
-        color: '#666',
-        lineHeight: 22,
+        fontSize: 15,
+        color: '#333',
+        lineHeight: 24,
     },
 });
