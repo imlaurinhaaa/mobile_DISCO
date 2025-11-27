@@ -6,6 +6,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import SongsDetails from './pages/SongsDetails';
+import Playlist from './pages/Playlist';
 
 const Stack = createNativeStackNavigator();
 
