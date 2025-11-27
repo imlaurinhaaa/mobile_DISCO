@@ -5,6 +5,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
+import CreatePlaylist from './pages/CreatePlaylist';
 import SongsDetails from './pages/SongsDetails';
 import Playlist from './pages/Playlist';
 
