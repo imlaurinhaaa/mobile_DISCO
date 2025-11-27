@@ -67,101 +67,103 @@ export default function Playlist() {
 
     return (
         <>
-            <StatusBar 
-                barStyle="light-content" 
-                backgroundColor="transparent" 
-                translucent={true} 
+            <StatusBar
+                barStyle="light-content"
+                backgroundColor="transparent"
+                translucent={true}
             />
             <ImageBackground source={require("../assets/background.png")} style={styles.background}>
-                <ScrollView 
+                <ScrollView
                     style={styles.scrollContainer}
                     contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}
                 >
-                <View style={styles.topSection}>
-                    <TouchableOpacity style={styles.backButton}>
-                        <Feather name="arrow-left-circle" size={30} color="white" />
-                    </TouchableOpacity>
-                </View>
-                <View style={styles.albumCoverSection}>
-                    <Image source={require('../assets/playlistImage.png')} style={styles.albumCover} />
-                </View>
-                <View style={styles.middleSection}>
-                    <View style={styles.leftSection}>
-                        <Text style={styles.playlistName}>
-                            Sua Playlist
-                        </Text>
-                        <TouchableOpacity 
-                            style={styles.descriptionButton}
-                            onPress={() => setModalVisible(true)}
-                        >
-                            <Text style={styles.text}>Descrição</Text>
+                    <View style={styles.topSection}>
+                        <TouchableOpacity style={styles.backButton}>
+                            <Feather name="arrow-left-circle" size={30} color="white" />
                         </TouchableOpacity>
                     </View>
-                    <View style={styles.rightSection}>
-                        <FontAwesome6 name="play-circle" size={50} color="white" />
+                    <View style={styles.albumCoverSection}>
+                        <Image source={require('../assets/playlistImage.png')} style={styles.albumCover} />
                     </View>
-                </View>
-                <View style={styles.songsSection}>
-                    <SongCard title="Song Title 1" duration="3:45" artist="Artist 1" />
-                    <SongCard title="Song Title 2" duration="4:20" artist="Artist 2" />
-                    <SongCard title="Song Title 3" duration="2:58" artist="Artist 3" />
-                    <SongCard title="Song Title 4" duration="5:10" artist="Artist 4" />
-                    <SongCard title="Song Title 5" duration="3:33" artist="Artist 5" />
-                </View>
-            </ScrollView>
-            
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={closeModal}
-            >
-                <TouchableWithoutFeedback onPress={closeModal}>
-                    <View style={styles.modalOverlay}>
-                        <TouchableWithoutFeedback onPress={() => {}}>
-                            <Animated.View 
-                                style={[
-                                    styles.modalContent,
-                                    {
-                                        transform: [{ translateY }],
-                                    },
-                                ]}
+                    <View style={styles.middleSection}>
+                        <View style={styles.leftSection}>
+                            <Text style={styles.playlistName}>
+                                Sua Playlist
+                            </Text>
+                            <TouchableOpacity
+                                style={styles.descriptionButton}
+                                onPress={() => setModalVisible(true)}
                             >
-                                <View 
-                                    style={styles.dragHandle}
-                                    {...panResponder.panHandlers}
-                                >
-                                    <View style={styles.dragBar} />
-                                </View>
-                                <View style={styles.modalHeader}>
-                                    <Image source={require('../assets/playlistImage.png')} style={styles.modalAlbumCover} />
-                                    <View style={styles.modalTopSection}>
-                                        <Text style={styles.modalTitle}>Sua Playlist</Text>
-                                    <Text style={styles.modalSubtitle}>de User</Text>
-                                    </View>
-                                </View>
-                                <View style={styles.divider} />
-                                <View style={styles.modalBody}>
-                                    <TouchableOpacity style={styles.optionCard}>
-                                        <AntDesign name="menu" size={24} color="#E0E0E0" />
-                                    <Text style={styles.modalText}>
-                                        Editar Playlist
-                                    </Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity style={styles.optionCard}>
-                                        <AntDesign name="close-circle" size={24} color="#E0E0E0" />
-                                    <Text style={styles.modalText}>
-                                        Apagar Playlist
-                                    </Text>
-                                    </TouchableOpacity>
-                                </View>
-                            </Animated.View>
-                        </TouchableWithoutFeedback>
+                                <Text style={styles.text}>Descrição</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.rightSection}>
+                            <FontAwesome6 name="play-circle" size={50} color="white" />
+                        </View>
                     </View>
-                </TouchableWithoutFeedback>
-            </Modal>
-        </ImageBackground>
+                    <View style={styles.songsSection}>
+                        <View style={styles.songsSection}>
+                            <SongCard id={1} title="Song Title 1" duration="3:45" artist="Artist 1" />
+                            <SongCard id={2} title="Song Title 2" duration="4:20" artist="Artist 2" />
+                            <SongCard id={3} title="Song Title 3" duration="2:58" artist="Artist 3" />
+                            <SongCard id={4} title="Song Title 4" duration="5:10" artist="Artist 4" />
+                            <SongCard id={5} title="Song Title 5" duration="3:33" artist="Artist 5" />
+                        </View>
+                    </View>
+                </ScrollView>
+
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisible}
+                    onRequestClose={closeModal}
+                >
+                    <TouchableWithoutFeedback onPress={closeModal}>
+                        <View style={styles.modalOverlay}>
+                            <TouchableWithoutFeedback onPress={() => { }}>
+                                <Animated.View
+                                    style={[
+                                        styles.modalContent,
+                                        {
+                                            transform: [{ translateY }],
+                                        },
+                                    ]}
+                                >
+                                    <View
+                                        style={styles.dragHandle}
+                                        {...panResponder.panHandlers}
+                                    >
+                                        <View style={styles.dragBar} />
+                                    </View>
+                                    <View style={styles.modalHeader}>
+                                        <Image source={require('../assets/playlistImage.png')} style={styles.modalAlbumCover} />
+                                        <View style={styles.modalTopSection}>
+                                            <Text style={styles.modalTitle}>Sua Playlist</Text>
+                                            <Text style={styles.modalSubtitle}>de User</Text>
+                                        </View>
+                                    </View>
+                                    <View style={styles.divider} />
+                                    <View style={styles.modalBody}>
+                                        <TouchableOpacity style={styles.optionCard}>
+                                            <AntDesign name="menu" size={24} color="#E0E0E0" />
+                                            <Text style={styles.modalText}>
+                                                Editar Playlist
+                                            </Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity style={styles.optionCard}>
+                                            <AntDesign name="close-circle" size={24} color="#E0E0E0" />
+                                            <Text style={styles.modalText}>
+                                                Apagar Playlist
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </Animated.View>
+                            </TouchableWithoutFeedback>
+                        </View>
+                    </TouchableWithoutFeedback>
+                </Modal>
+            </ImageBackground>
         </>
     );
 }
