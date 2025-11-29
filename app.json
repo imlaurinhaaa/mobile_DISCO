@@ -3,6 +3,10 @@
     "name": "DISCO",
     "slug": "DISCO",
     "version": "1.0.0",
+    "extra": {
+      "apiUrl": "http://192.168.56.1:4000/api/",
+      "apiImg": "http://192.168.56.1:4000/uploads/"
+    },
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
