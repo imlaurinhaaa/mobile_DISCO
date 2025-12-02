@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import {
     StyleSheet,
     Text,
@@ -8,24 +9,24 @@ import {
     KeyboardAvoidingView,
     TouchableOpacity,
     Platform,
-    Dimensions,
+    Dimensions
 } from 'react-native';
-import { useEffect, useState } from 'react';
 import * as Font from 'expo-font';
 import { Ionicons } from '@expo/vector-icons';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { LinearGradient } from 'expo-linear-gradient';
-
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-export default function SignIn({ navigation }) {
+// URL do backend
+const BASE_URL = 'http://192.168.100.171:4000';
+
+export default function SignUp({ navigation }) {
+    const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [fontsLoaded, setFontsLoaded] = useState(false);
-    const [name, setName] = useState('');
-
-    const handleNameChange = (text) => setName(text);
 
     useEffect(() => {
         async function loadFonts() {
@@ -39,49 +40,40 @@ export default function SignIn({ navigation }) {
                     'EmblemaOne-Regular': require('../assets/fonts/EmblemaOne-Regular.ttf'),
                     'Montserrat-SemiBoldItalic': require('../assets/fonts/Montserrat-SemiBoldItalic.ttf'),
                 });
-                setFontsLoaded(true);
             } catch (error) {
                 console.log('Erro ao carregar fontes:', error);
+            } finally {
                 setFontsLoaded(true);
             }
         }
         loadFonts();
     }, []);
 
-    const handleEmailChange = (text) => setEmail(text);
-    const handlePasswordChange = (text) => setPassword(text);
-    const [showPassword, setShowPassword] = useState(false);
-
-    const isEmailValid = (emailToTest) => /\S+@\S+\.\S+/.test(emailToTest);
-
-    const handleLogin = () => {
-        if (!isEmailValid(email) || email.length === 0 || password.length === 0) {
-            Alert.alert('Erro', 'Por favor, insira um e-mail e senha válidos.');
+    const handleRegister = async () => {
+        if (!name || !email || !password) {
+            Alert.alert('Erro', 'Preencha todos os campos.');
             return;
         }
-        console.log('Entrando com', email);
 
         try {
+            const response = await fetch(`${BASE_URL}/api/users/create`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password, photo: null })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                Alert.alert('Erro', data.error || 'Erro ao registrar usuário.');
+                return;
+            }
+
+            Alert.alert('Sucesso', 'Usuário registrado com sucesso!');
             navigation.navigate('Home');
         } catch (error) {
-            console.log('Erro na navegação para Home:', error);
-        }
-    };
-
-    const handleBackPress = () => {
-        try {
-            navigation.navigate('Home');
-        } catch (error) {
-            console.log('Erro na navegação para a tela inicial:', error);
-            if (navigation && navigation.goBack) navigation.goBack();
-        }
-    };
-
-    const handleSignInPress = () => {
-        try {
-            navigation.navigate('SignIn');
-        } catch (error) {
-            console.log('Erro na navegação para a tela de login:', error);
+            console.log('Erro ao registrar usuário:', error);
+            Alert.alert('Erro', 'Falha na conexão com o servidor.');
         }
     };
 
@@ -95,26 +87,22 @@ export default function SignIn({ navigation }) {
 
     return (
         <View style={styles.container}>
-            <ImageBackground source={require('../assets/img/fundoPage.png')} style={styles.backgroundImage} resizeMode="cover">
-                <KeyboardAvoidingView style={styles.keyboardView} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
-
-                    <View style={styles.contentContainer} importantForAutofill="noExcludeDescendants">
-
+            <ImageBackground
+                source={require('../assets/img/fundoPage.png')}
+                style={styles.backgroundImage}
+                resizeMode="cover"
+            >
+                <KeyboardAvoidingView
+                    style={styles.keyboardView}
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                >
+                    <View style={styles.contentContainer}>
                         <TextInput
                             style={styles.input}
                             placeholder="Nome"
                             placeholderTextColor="rgba(0,0,0,0.6)"
                             value={name}
-                            onChangeText={handleNameChange}
-                            autoCapitalize="none"
-                            keyboardType="default"
-                            underlineColorAndroid="transparent"
-                            selectionColor="#4a4a4a"
-                            importantForAutofill="no"
-                            autoComplete="off"
-                            outlineColor="transparent"
-                            activeOutlineColor="transparent"
-                            mode="flat"
+                            onChangeText={setName}
                         />
 
                         <TextInput
@@ -122,50 +110,37 @@ export default function SignIn({ navigation }) {
                             placeholder="E-mail"
                             placeholderTextColor="rgba(0,0,0,0.6)"
                             value={email}
-                            onChangeText={handleEmailChange}
-                            autoCapitalize="none"
+                            onChangeText={setEmail}
                             keyboardType="email-address"
-                            underlineColorAndroid="transparent"
-                            selectionColor="#4a4a4a"
-                            importantForAutofill="no"
-                            autoComplete="off"
-                            outlineColor="transparent"
-                            activeOutlineColor="transparent"
-                            mode="flat"
                         />
 
-                        <View style={styles.inputContainer} importantForAutofill="noExcludeDescendants">
-
+                        <View style={styles.inputContainer}>
                             <TextInput
                                 style={{ flex: 1, color: '#4a4a4a', paddingHorizontal: 8 }}
                                 placeholder="Senha"
                                 placeholderTextColor="rgba(0,0,0,0.6)"
-                                placeholderFontSize={15}
                                 secureTextEntry={!showPassword}
                                 value={password}
-                                onChangeText={handlePasswordChange}
-                                autoCapitalize="none"
-                                underlineColorAndroid="transparent"
-                                selectionColor="#4a4a4a"
-                                importantForAutofill="no"
-                                autoComplete="off"
-                                autoCorrect={false}
-                                outlineColor="transparent"
-                                activeOutlineColor="transparent"
-                                mode="flat"
+                                onChangeText={setPassword}
                             />
-
-                            <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.validationIcon}>
-                                <Ionicons name={showPassword ? "eye" : "eye-off"} size={20} color="#4a4a4a" />
+                            <TouchableOpacity
+                                onPress={() => setShowPassword(!showPassword)}
+                                style={styles.validationIcon}
+                            >
+                                <Ionicons
+                                    name={showPassword ? 'eye' : 'eye-off'}
+                                    size={20}
+                                    color="#4a4a4a"
+                                />
                             </TouchableOpacity>
                         </View>
 
-                        <Text style={styles.orText}>or</Text>
+                        <Text style={styles.orText}>Ou</Text>
 
                         <View style={styles.orRow}>
                             <View style={styles.orLineWrap}>
                                 <View style={styles.line} />
-                                <TouchableOpacity style={styles.link} onPress={handleSignInPress}>
+                                <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
                                     <Text style={styles.linkText}>Já possui uma conta? <Text style={{ fontWeight: 'bold' }}>Entre</Text></Text>
                                 </TouchableOpacity>
                                 <View style={styles.line} />
@@ -186,21 +161,15 @@ export default function SignIn({ navigation }) {
                             </TouchableOpacity>
                         </View>
                     </View>
-                    <TouchableOpacity onPress={handleLogin} style={styles.button}>
+
+                    <TouchableOpacity onPress={handleRegister} style={styles.button}>
                         <LinearGradient
                             colors={['#19043cff', '#310f87ff', '#19043cff']}
                             start={{ x: 0, y: 0 }}
                             end={{ x: 1, y: 0 }}
                             style={styles.gradientButton}
                         >
-                            <LinearGradient
-                                colors={['rgba(255,255,255,0.12)', 'rgba(255,255,255,0)']}
-                                start={{ x: 0, y: 0 }}
-                                end={{ x: 1, y: 1 }}
-                                style={styles.buttonSheen}
-                            />
-
-                            <Text style={styles.buttonText}>Entrar</Text>
+                            <Text style={styles.buttonText}>Cadastrar</Text>
                         </LinearGradient>
                     </TouchableOpacity>
                 </KeyboardAvoidingView>
@@ -209,10 +178,15 @@ export default function SignIn({ navigation }) {
     );
 }
 
-
 const styles = StyleSheet.create({
-    container: { flex: 1 },
-    backgroundImage: { flex: 1 },
+    container: {
+        flex: 1
+    },
+
+    backgroundImage: {
+        flex: 1
+    },
+
     keyboardView: {
         flex: 1,
         justifyContent: 'flex-start',
@@ -222,7 +196,7 @@ const styles = StyleSheet.create({
 
     contentContainer: {
         alignItems: 'center',
-        marginTop: 310,
+        marginTop: 290,
     },
 
     input: {
@@ -254,15 +228,11 @@ const styles = StyleSheet.create({
         padding: 6,
     },
 
-    link: {
-        alignItems: 'center',
-        margin: 10,
-    },
-
     linkText: {
         color: '#ffffffff',
         fontSize: 14,
-
+        fontWeight: '500',
+        margin: 12,
     },
 
     orRow: {
