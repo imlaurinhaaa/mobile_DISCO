@@ -4,6 +4,7 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Defs, RadialGradient, Stop, Rect } from 'react-native-svg';
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from '@expo/vector-icons';
+import EvilIcons from '@expo/vector-icons/EvilIcons';
 
 export default function CreatePlaylist() {
 
@@ -45,6 +46,7 @@ export default function CreatePlaylist() {
                 </Svg>
                 <ScrollView>
                     <View style={styles.container}>
+                        <EvilIcons name="arrow-left" size={30} color="white" style={styles.backIcon} />
                         <Text style={styles.title}>Crie uma nova playlist!</Text>
                         <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
                             {image ? (
@@ -60,15 +62,19 @@ export default function CreatePlaylist() {
                             )}
                         </TouchableOpacity>
                         <TextInput
-                            placeholder="Nome da Playlist"
+                            placeholder="Nome da Playlist..."
                             placeholderTextColor="#ccc"
                             style={styles.inputName}
                         />
                         <TextInput
-                            placeholder="Descrição da Playlist"
+                            placeholder="Adicione uma descrição..."
                             placeholderTextColor="#ccc"
                             style={styles.inputDescription}
                         />
+                        <TouchableOpacity style={styles.createButton}>
+                            <Ionicons name="add" size={24} color="#000000" />
+                            <Text style={styles.buttonText}>Adicionar músicas</Text>
+                        </TouchableOpacity>
                     </View>
                 </ScrollView>
             </SafeAreaView>
@@ -111,21 +117,39 @@ const styles = StyleSheet.create({
         backgroundColor: "#353535",
     },
     inputName: {
-        width: '100%',
-        height: 50,
-        borderRadius: 5,   
-        paddingHorizontal: 10,
+        flex: 1,
         color: 'white',
-        marginTop: 20,
+        paddingVertical: 12,
         textAlign: 'center',
+        marginTop: 20,
     },
     inputDescription: {
-        width: '100%',
+        width: '80%',
+        borderRadius: 5,
         height: 100,
-        borderRadius: 5,   
+        borderRadius: 5,
         paddingHorizontal: 10,
         color: 'white',
         marginTop: 20,
         textAlign: 'center',
+        backgroundColor: '#353535',
+    },
+    createButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#ffffffff',
+        paddingVertical: 5,
+        paddingHorizontal: 20,
+        borderRadius: 30,
+        marginTop: 30,
+    },
+    buttonText: {
+        color: '#000000',
+        fontSize: 12,
+        marginLeft: 10,
+    },
+    backIcon: {
+        alignSelf: 'flex-start',
+        marginBottom: 20,
     },
 });
