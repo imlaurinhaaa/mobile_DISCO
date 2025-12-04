@@ -8,13 +8,15 @@ import SignUp from './pages/SignUp';
 import HomeScreen from './pages/Home';
 import CreatePlaylist from './pages/CreatePlaylist';
 import Album from './pages/Album';
+import SongsDetails from './pages/SongsDetails';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Album" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName="SongsDetails" screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="SongsDetails" component={SongsDetails} />
         <Stack.Screen name="CreatePlaylist" component={CreatePlaylist} />
         <Stack.Screen name="Album" component={Album} />
         <Stack.Screen name="Home" component={HomeScreen} />

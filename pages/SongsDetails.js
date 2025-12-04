@@ -1,237 +1,202 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useNavigation, useRoute } from '@react-navigation/native';
+'use client';
+import React, { useState } from 'react';
+import { View, StyleSheet, ScrollView, Text, Image, TouchableOpacity } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import Svg, { Defs, RadialGradient, Stop, Rect } from 'react-native-svg';
+import EvilIcons from '@expo/vector-icons/EvilIcons';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
-import axios from 'axios';
-import Constants from 'expo-constants';
+export default function Album() {
+    const [likedSongs, setLikedSongs] = useState({});
 
-export default function SongsDetails() {
-    const route = useRoute();
-    const navigation = useNavigation();
-    const {apiUrl} = Constants.expoConfig.extra;
-    
-    const { song, apiImg } = route.params || {}; 
-
-    const [songDetails, setSongDetails] = useState(null);
-
-    useEffect(() => {
-        if (song?.id) {
-            console.log("ID da música recebida:", song.id);
-            axios.get(`${apiUrl}songs/${song.id}`)
-                .then((response) => {
-                    console.log("Detalhes da música recebidos:", response.data);
-                    setSongDetails(response.data);
-                })
-                .catch((error) => {
-                    console.error("Erro ao buscar detalhes da música:", error);
-                });
-        }
-    }, [song]);
-
-    if (!song) {
-        return (
-            <View style={styles.container}>
-                <Text style={{textAlign: 'center', marginTop: 50, color: '#fff'}}>Nenhuma música selecionada.</Text>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={{alignItems:'center', marginTop: 20}}>
-                    <Text style={{color: '#8000ff'}}>Voltar</Text>
-                </TouchableOpacity>
-            </View>
-        );
-    }
+    const toggleLike = (songId) => {
+        setLikedSongs((prev) => ({
+            ...prev,
+            [songId]: !prev[songId],
+        }));
+    };
 
     return (
-        <ScrollView style={styles.container}>
-            <View style={styles.header}>
-                <TouchableOpacity
-                    style={styles.backButton}
-                    onPress={() => navigation.goBack()}
-                >
-                    <MaterialCommunityIcons
-                        name="arrow-left-circle"
-                        size={40}
-                        color="#fff"
-                    />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>{song.album_id?.title || "Álbum"}</Text>
+        <SafeAreaProvider>
+            <SafeAreaView style={styles.container}>
+                <Svg style={styles.background} pointerEvents="none" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <Defs>
+                        <RadialGradient id="radial" cx="50%" cy="30%" rx="50%" ry="50%">
+                            <Stop offset="0%" stopColor="#231385" />
+                            <Stop offset="100%" stopColor="#101027" />
+                        </RadialGradient>
+                    </Defs>
+                    <Rect width="100%" height="100%" fill="url(#radial)" />
+                </Svg>
+
+                <ScrollView>
+                    <View style={styles.container}>
+                        <EvilIcons name="arrow-left" size={30} color="white" style={styles.backIcon} />
+
+                        <Image
+                            source={require('../assets/playlistImage.png')}
+                            style={styles.albumImage}
+                        />
+
+                        <View style={styles.infoContainer}>
+                            <View style={styles.info}>
+                                <Text style={styles.titleAlbum}>Album Title</Text>
+                                <Text style={styles.textAlbum}>Artist Name</Text>
+                            </View>
+                            <View style={styles.infoAlbum}>
+                                <TouchableOpacity onPress={() => toggleLike(id)}>
+                                    <FontAwesome
+                                        name={likedSongs[id] ? 'heart' : 'heart-o'}
+                                        size={24}
+                                        color={likedSongs[id] ? 'red' : 'white'}
+                                    />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                        <Image
+                            source={require('../assets/img/player.png')}
+                            style={styles.player}
+                        />
+                        <View style={styles.lyricsBox}>
+                            <Text style={styles.titleLyrics}>LETRA</Text>
+                            <Text style={styles.lyrics}>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                            </Text>
+                        </View>
+                        <View style={styles.card}>
+            <Image
+                source={require('../assets/playlistImage.png')}
+                style={styles.cardImage}
+            />
+
+            <View style={styles.cardContent}>
+                <Text style={styles.cardTitle}>DESCRIÇÃO</Text>
+                <Text style={styles.cardText}>
+                    Aqui vai o texto da descrição...
+                </Text>
             </View>
-
-            <View style={styles.content}>
-                <View style={styles.imageContainer}>
-                    <Image 
-                        source={{ uri: song.album_id?.photo_disk ? `${apiImg}${song.album_id.photo_disk}` : 'https://placehold.co/300' }} 
-                        style={styles.image} 
-                    />
-                </View>
-
-                <View style={styles.songHeader}>
-                    <View style={styles.infoContainer}>
-                        <Text style={styles.title}>{song.title}</Text>
-                        <Text style={styles.artist}>{song.singer_id?.name || "Artista"}</Text>
+        </View>
                     </View>
-
-                    <View style={styles.interactContainer}>
-                        <TouchableOpacity style={styles.iconButton}>
-                            <Ionicons name="add-circle-outline" size={32} color="#fff" />
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.iconButton}>
-                            <Ionicons name="heart-outline" size={32} color="#fff" />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-
-                <View style={styles.progressContainer}>
-                    <View style={styles.progressBar}>
-                        <View style={styles.progressFill} />
-                    </View>
-                    <Text style={styles.timeText}>{song.time || "00:00"}</Text>
-                </View>
-
-                <View style={styles.playButtonContainer}>
-                    <TouchableOpacity style={styles.playButton}>
-                        <Ionicons name="play" size={40} color="#fff" />
-                    </TouchableOpacity>
-                </View>
-
-                <View style={styles.lyricsContainer}>
-                    <Text style={styles.sectionTitle}>LETRA</Text>
-                    <Text style={styles.lyricsText}>{song.lyrics || "Letra não disponível"}</Text>
-                </View>
-
-                <View style={styles.descriptionContainer}>
-                    <Text style={styles.sectionTitle}>DESCRIÇÃO</Text>
-                    <Text style={styles.descriptionText}>{song.description || ""}</Text>
-                </View>
-            </View>
-        </ScrollView>
+                </ScrollView>
+            </SafeAreaView>
+        </SafeAreaProvider>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0a0a2e',
+        backgroundColor: '#0a0a1a',
     },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingTop: 50,
-        paddingBottom: 20,
+    background: {
+        position: 'absolute',
+        width: '100%',
+        height: '40%',
+        top: 0,
+        left: 0,
+        zIndex: -1,
     },
-    backButton: {
-        marginRight: 16,
+    backIcon: {
+        marginLeft: 16,
+        marginTop: 10,
     },
-    headerTitle: {
-        fontSize: 18,
-        fontWeight: '400',
-        color: '#fff',
-        flex: 1,
-        textAlign: 'center',
-        marginRight: 40,
+    albumImage: {
+        width: 250,
+        height: 250,
+        borderRadius: 20,
+        alignSelf: 'center',
+        marginVertical: 30,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.3,
+        shadowRadius: 20,
+        elevation: 5,
     },
-    content: {
-        paddingHorizontal: 30,
-    },
-    imageContainer: {
-        alignItems: 'center',
-        marginBottom: 24,
-    },
-    image: {
-        width: 300,
-        height: 300,
-        borderRadius: 16,
-        backgroundColor: '#1a1a3e',
-    },
-    songHeader: {
+    infoContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 20,
+        paddingHorizontal: 20,
     },
-    infoContainer: {
-        flex: 1,
-    },
-    title: {
-        fontSize: 28,
+    titleAlbum: {
+        fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 4,
         color: '#fff',
-        textTransform: 'uppercase',
+        marginBottom: 8,
     },
-    artist: {
+    textAlbum: {
         fontSize: 16,
-        color: '#999',
+        color: '#b0b0c3',
+        marginBottom: 12,
     },
-    interactContainer: {
+    infoAlbum: {
         flexDirection: 'row',
         gap: 16,
     },
-    iconButton: {
-        marginLeft: 8,
+    textInfo: {
+        fontSize: 14,
+        color: '#8080a0',
     },
-    progressContainer: {
-        marginBottom: 20,
+    songs: {
+        paddingHorizontal: 20,
+        paddingBottom: 20,
     },
-    progressBar: {
-        width: '100%',
-        height: 4,
-        backgroundColor: '#1a1a3e',
-        borderRadius: 2,
-        marginBottom: 8,
+    player: {
+        alignSelf: 'center',
+        width: '90%',
+        height: 90,
     },
-    progressFill: {
-        width: '40%',
-        height: '100%',
-        backgroundColor: '#8000ff',
-        borderRadius: 2,
+    lyricsBox: {
+        backgroundColor: '#F7F9FF',
+        borderRadius: 15,
+        paddingVertical: 20,
+        width: '90%',
+        alignSelf: 'center',
+        marginTop: 20,
+        paddingHorizontal: 20,
+        minHeight: 200,
     },
-    timeText: { 
-        fontSize: 14, 
-        color: '#999',
-        textAlign: 'right',
-    },
-    playButtonContainer: {
-        alignItems: 'center',
-        marginVertical: 24,
-    },
-    playButton: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        backgroundColor: 'transparent',
-        borderWidth: 3,
-        borderColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    lyricsContainer: {
-        backgroundColor: '#f5f5f5',
-        borderRadius: 16,
-        padding: 20,
-        marginBottom: 20,
-    },
-    sectionTitle: {
-        fontSize: 18,
+    titleLyrics: {
+        fontSize: 20,
         fontWeight: 'bold',
-        marginBottom: 12,
-        color: '#0a0a2e',
-        letterSpacing: 1,
+        color: '#00003C',
+        textAlign: 'left',
     },
-    lyricsText: {
-        fontSize: 15,
-        color: '#333',
-        lineHeight: 24,
+    lyrics: {
+        marginTop: 10,
+        fontSize: 16,
+        color: '#00003C',
+        textAlign: 'left',
     },
-    descriptionContainer: {
-        backgroundColor: '#f5f5f5',
-        borderRadius: 16,
-        padding: 20,
-        marginBottom: 40,
-    },
-    descriptionText: {
-        fontSize: 15,
-        color: '#333',
-        lineHeight: 24,
-    },
+    card: {
+    width: '90%',
+    backgroundColor: '#F7F9FF',
+    borderRadius: 20,
+    overflow: 'hidden',
+    alignSelf: 'center',
+    marginTop: 40,
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+},
+cardImage: {
+    width: '100%',
+    height: 140,
+},
+cardContent: {
+    padding: 15,
+},
+cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#00003C',
+    marginBottom: 10,
+},
+cardText: {
+    fontSize: 15,
+    color: '#00003C',
+},
 });

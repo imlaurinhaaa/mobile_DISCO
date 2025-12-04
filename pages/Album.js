@@ -1,45 +1,13 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, Text, Image, ActivityIndicator } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, ScrollView, Text, Image } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Defs, RadialGradient, Stop, Rect } from 'react-native-svg';
 import EvilIcons from '@expo/vector-icons/EvilIcons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import SongCard from '../components/SongCard';
-import axios from 'axios';
 
-export default function Album({ route }) {
-    const { id } = route.params;
-
-    const [album, setAlbum] = useState(null);
-    const [songs, setSongs] = useState([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        loadData();
-    }, []);
-
-    const loadData = async () => {
-        try {
-            const albumResponse = await axios.get(`http://localhost:4000/api/albums/${id}`);
-            const songsResponse = await axios.get(`http://localhost:4000/api/songs?album_id=${id}`);
-
-            setAlbum(albumResponse.data);
-            setSongs(songsResponse.data);
-        } catch (e) {
-            console.log("ERRO AO CARREGAR:", e);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    if (loading) {
-        return (
-            <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <ActivityIndicator size="large" color="#fff" />
-            </SafeAreaView>
-        );
-    }
+export default function Album() {
 
     return (
         <SafeAreaProvider>
@@ -59,18 +27,18 @@ export default function Album({ route }) {
                         <EvilIcons name="arrow-left" size={30} color="white" style={styles.backIcon} />
 
                         <Image
-                            source={{ uri: `http://localhost:4000/uploads/${album.photo_cover}` }}
+                            source={require('../assets/playlistImage.png')}
                             style={styles.albumImage}
                         />
 
                         <View style={styles.info}>
                             <View style={styles.infoContainer}>
-                                <Text style={styles.titleAlbum}>{album.title}</Text>
-                                <Text style={styles.textAlbum}>{album.artist}</Text>
+                                <Text style={styles.titleAlbum}>Album Title</Text>
+                                <Text style={styles.textAlbum}>Artist Name</Text>
 
                                 <View style={styles.infoAlbum}>
-                                    <Text style={styles.textInfo}>{album.year}</Text>
-                                    <Text style={styles.textInfo}>{album.duration || "00:00"}</Text>
+                                    <Text style={styles.textInfo}>Year</Text>
+                                    <Text style={styles.textInfo}>Duration</Text>
                                 </View>
                             </View>
 
@@ -78,15 +46,15 @@ export default function Album({ route }) {
                         </View>
 
                         <View style={styles.songs}>
-                            {songs.map(song => (
-                                <SongCard
-                                    key={song.id}
-                                    id={song.id}
-                                    title={song.title}
-                                    duration={song.duration}
-                                    artist={song.artist}
-                                />
-                            ))}
+                            <SongCard />
+                            <SongCard />
+                            <SongCard />
+                            <SongCard />
+                            <SongCard />
+                            <SongCard />
+                            <SongCard />
+                            <SongCard />
+
                         </View>
                     </View>
                 </ScrollView>
@@ -94,3 +62,67 @@ export default function Album({ route }) {
         </SafeAreaProvider>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#0a0a1a',
+    },
+    background: {
+        position: 'absolute',
+        width: '100%',
+        height: '40%',
+        top: 0,
+        left: 0,
+        zIndex: -1,
+    },
+    backIcon: {
+        marginLeft: 16,
+        marginTop: 10,
+    },
+    albumImage: {
+        width: 250,
+        height: 250,
+        borderRadius: 20,
+        alignSelf: 'center',
+        marginVertical: 30,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.3,
+        shadowRadius: 20,
+        elevation: 5,
+    },
+    info: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-end',
+        paddingHorizontal: 20,
+        marginBottom: 30,
+    },
+    infoContainer: {
+        flex: 1,
+    },
+    titleAlbum: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#fff',
+        marginBottom: 8,
+    },
+    textAlbum: {
+        fontSize: 16,
+        color: '#b0b0c3',
+        marginBottom: 12,
+    },
+    infoAlbum: {
+        flexDirection: 'row',
+        gap: 16,
+    },
+    textInfo: {
+        fontSize: 14,
+        color: '#8080a0',
+    },
+    songs: {
+        paddingHorizontal: 20,
+        paddingBottom: 20,
+    },
+});
