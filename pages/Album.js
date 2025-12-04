@@ -7,7 +7,10 @@ import EvilIcons from '@expo/vector-icons/EvilIcons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import SongCard from '../components/SongCard';
 
-export default function Album() {
+export default function Album({ route }) {
+    // Por enquanto só recebe o ID, quando conectar o backend vai usar ele
+    const albumId = route?.params?.id;
+    console.log('ID do álbum recebido:', albumId);
 
     return (
         <SafeAreaProvider>

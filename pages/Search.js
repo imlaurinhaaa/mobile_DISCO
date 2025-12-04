@@ -4,7 +4,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Activi
 
 const API_URL = "http://localhost:4000/api";
 
-export default function Search() {
+export default function Search({ navigation }) {
     const [songs, setSongs] = useState([]);
     const [genres, setGenres] = useState([]);
 
@@ -200,9 +200,14 @@ export default function Search() {
                         <View style={styles.resultSection}>
                             <Text style={styles.sectionHeader}>Artistas</Text>
                             {searchedSingers.map((singer, index) => (
-                                <View key={index} style={styles.resultCard}>
+                                <TouchableOpacity
+                                    key={index}
+                                    style={styles.resultCard}
+                                    onPress={() => handleSelectSinger(singer.name)}
+                                >
                                     <Text style={styles.resultTitle}>{singer.name}</Text>
-                                </View>
+                                    <Text style={styles.resultSubtitle}>{singer.musical_genre || 'Artista'}</Text>
+                                </TouchableOpacity>
                             ))}
                         </View>
                     )}
@@ -211,9 +216,14 @@ export default function Search() {
                         <View style={styles.resultSection}>
                             <Text style={styles.sectionHeader}>Álbuns</Text>
                             {searchedAlbums.map((album, index) => (
-                                <View key={index} style={styles.resultCard}>
+                                <TouchableOpacity
+                                    key={index}
+                                    style={styles.resultCard}
+                                    onPress={() => navigation.navigate('Album', { id: album.id })}
+                                >
                                     <Text style={styles.resultTitle}>{album.title}</Text>
-                                </View>
+                                    <Text style={styles.resultSubtitle}>{album.artist}</Text>
+                                </TouchableOpacity>
                             ))}
                         </View>
                     )}
@@ -222,9 +232,14 @@ export default function Search() {
                         <View style={styles.resultSection}>
                             <Text style={styles.sectionHeader}>Músicas</Text>
                             {songs.map((song, index) => (
-                                <View key={index} style={styles.resultCard}>
+                                <TouchableOpacity
+                                    key={index}
+                                    style={styles.resultCard}
+                                    onPress={() => navigation.navigate('SongsDetails', { id: song.id })}
+                                >
                                     <Text style={styles.resultTitle}>{song.title}</Text>
-                                </View>
+                                    <Text style={styles.resultSubtitle}>{song.artist}</Text>
+                                </TouchableOpacity>
                             ))}
                         </View>
                     )}
@@ -265,9 +280,9 @@ export default function Search() {
                                                     <View style={styles.songInfo}>
                                                         {song.photo_cover ? (
                                                             <Image source={{ uri: song.photo_cover }} style={styles.albumCover} />
-                                                        ): (
+                                                        ) : (
                                                             <View style={styles.albumCoverPlaceholder} />
-                                                            )}
+                                                        )}
                                                         <View style={styles.textContainer}>
                                                             <Text style={styles.songTitle} numberOfLines={1}>{song.title || 'Sem título'}</Text>
                                                             <Text style={styles.duration} numberOfLines={1}>
@@ -306,7 +321,7 @@ function formatSongs(arr) {
         }
         return {
             ...s,
-            photo_cover: coverUrl, 
+            photo_cover: coverUrl,
         };
     });
 }
