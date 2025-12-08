@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { View, StyleSheet, ScrollView, Text, Image, TouchableOpacity, FlatList } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Defs, RadialGradient, Stop, Rect } from 'react-native-svg';
@@ -18,6 +18,8 @@ export default function Profile({ navigation }) {
     };
 
     const [favorites, setFavorites] = useState([]);
+    const [artists, setArtists] = useState([]);
+    const [albuns, setAlbuns] = useState([]);
 
     useEffect(() => {
         const fetchFavorites = async () => {
@@ -33,6 +35,39 @@ export default function Profile({ navigation }) {
         };
 
         fetchFavorites();
+    }, []);
+
+    useEffect(() => {
+        const fetchArtists = async () => {
+            const favoriteArtistIds = [1, 3, 7, 10];
+            try {
+                const response = await axios.get(`${API_URL}/singers`);
+                const allArtists = response.data || [];
+                const myFavoriteArtists = allArtists.filter(artist => favoriteArtistIds.includes(artist.id));
+                setArtists(myFavoriteArtists);
+            } catch (error) {
+                console.error("Erro ao buscar artistas favoritos:", error);
+            }
+        };
+
+        fetchArtists();
+    }, []);
+
+    useEffect(() => {
+        const fetchAlbuns = async () => {
+            const favoriteAlbumIds = [2, 4, 5, 7];
+            try {
+                const response = await axios.get(`${API_URL}/albums`);
+                const allAlbuns = response.data || [];
+                const myFavoriteAlbuns = allAlbuns.filter(album => favoriteAlbumIds.includes(album.id));
+                setAlbuns(myFavoriteAlbuns);
+            }
+            catch (error) {
+                console.error("Erro ao buscar álbuns favoritos:", error);
+            }
+        };
+
+        fetchAlbuns();
     }, []);
 
     // Sample playlists
@@ -68,11 +103,25 @@ export default function Profile({ navigation }) {
         </View>
     );
 
+    const renderArtist = ({ item }) => (
+        <View style={styles.artistRow}>
+            <Image source={{ uri: item.photo }} style={styles.artistImage} />
+            <Text style={styles.artistName}>{item.name}</Text>
+        </View>
+    );
+
+    const renderAlbum = ({ item }) => (
+            <View style={styles.playlistCard}>
+                <Image source={{ uri: item.photo_cover }} style={styles.songCover} />
+                <Text style={styles.songTitle}>{item.title}</Text>
+            </View>
+    );
+
     return (
         <SafeAreaProvider>
             <SafeAreaView style={styles.container}>
                 <View style={styles.contentWrapper}>
-                    <Svg style={styles.blur} pointerEvents="none" viewBox="0 0 420 420" preserveAspectRatio="xMidYMid slice">
+                    <Svg style={[styles.blur, { pointerEvents: 'none' }]} viewBox="0 0 420 420" preserveAspectRatio="xMidYMid slice">
                         <Defs>
                             <RadialGradient id="radial" cx="50%" cy="30%" rx="50%" ry="50%">
                                 <Stop offset="0%" stopColor="#231385" stopOpacity="1" />
@@ -113,6 +162,31 @@ export default function Profile({ navigation }) {
                                 style={styles.playlistsList}
                             />
                         </View>
+
+                        <View style={styles.artistsSection}>
+                            <Text style={styles.sectionTitle}>Seus artistas favoritos</Text>
+                            <FlatList
+                                data={artists}
+                                renderItem={renderArtist}
+                                keyExtractor={(artist) => artist.id}
+                                horizontal={true}
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={styles.artistsList}
+                            />
+                        </View>
+
+                        <View style={styles.albunsSection}>
+                            <Text style={styles.sectionTitle}>Seus álbuns favoritos</Text>
+                            <FlatList
+                                data={albuns}
+                                renderItem={renderAlbum}
+                                keyExtractor={(item) => item.id}
+                                scrollEnabled={false}
+                                numColumns={2}
+                                columnWrapperStyle={{ gap: 12 }}
+                                style={styles.albunsList}
+                            />
+                            </View>
                     </ScrollView>
                 </View>
             </SafeAreaView>
@@ -167,14 +241,6 @@ const styles = StyleSheet.create({
     playlistsSection: {
         marginBottom: 24,
     },
-    createPlaylistButton: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        backgroundColor: '#fff',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
     sectionTitle: {
         color: '#fff',
         fontSize: 20,
@@ -184,11 +250,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 16,
-    },
-    songCover: {
-        width: 50,
-        height: 50,
-        borderRadius: 8,
     },
     songMeta: {
         flex: 1,
@@ -234,5 +295,38 @@ const styles = StyleSheet.create({
     },
     playlistsList: {
         alignContent:'center'
-}
+},
+artistsList: {
+    paddingLeft: 0,
+},
+    artistRow: {
+        alignItems: 'center',
+        marginRight: 16,
+    },
+    artistImage: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        backgroundColor: '#333',
+        marginBottom: 8,
+    },
+    artistName: {
+        color: '#fff',
+        fontSize: 14,
+    },
+    albunsSection: {
+        marginTop: 24,
+    },
+    albunsList: {
+        alignContent:'center'
+    },
+    songCover: {
+        width: 100,
+        height: 100,
+        borderRadius: 12,
+        backgroundColor: '#2a2a40',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
 });
