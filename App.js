@@ -6,22 +6,22 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import HomeScreen from './pages/Home';
-import CreatePlaylist from './pages/CreatePlaylist';
 import Album from './pages/Album';
 import SongsDetails from './pages/SongsDetails';
 import Search from './pages/Search';
 import Profile from './pages/Profile';
+import Singer from './pages/Singer';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Profile" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName="Search" screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Singer" component={Singer} />
         <Stack.Screen name="Profile" component={Profile} />
         <Stack.Screen name="Search" component={Search} />
         <Stack.Screen name="SongsDetails" component={SongsDetails} />
-        <Stack.Screen name="CreatePlaylist" component={CreatePlaylist} />
         <Stack.Screen name="Album" component={Album} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="SignUp" component={SignUp} />

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Image } from "react-native";
 
-const API_URL = "http://192.168.0.243:4000/api";
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:4000/api';
 
 export default function Search({ navigation }) {
     const [songs, setSongs] = useState([]);
@@ -203,7 +203,7 @@ export default function Search({ navigation }) {
                                 <TouchableOpacity
                                     key={index}
                                     style={styles.resultCard}
-                                    onPress={() => handleSelectSinger(singer.name)}
+                                    onPress={() => navigation.navigate('Singer', { id: singer.id, name: singer.name })}
                                 >
                                     <Text style={styles.resultTitle}>{singer.name}</Text>
                                     <Text style={styles.resultSubtitle}>{singer.musical_genre || 'Artista'}</Text>
@@ -257,7 +257,7 @@ export default function Search({ navigation }) {
                             {singersByGenre.map((singer, index) => (
                                 <TouchableOpacity
                                     key={index}
-                                    onPress={() => handleSelectSinger(singer.name)}
+                                    onPress={() => navigation.navigate('Singer', { id: singer.id, name: singer.name })}
                                     style={[styles.singerItem, selectedSinger === singer.name && styles.selectedSinger]}>
                                     <Text style={styles.singerText}>{singer.name}</Text>
                                 </TouchableOpacity>
@@ -276,7 +276,11 @@ export default function Search({ navigation }) {
                                         songs.map((song, index) => {
                                             const key = song.id ? song.id.toString() : song.title || index.toString();
                                             return (
-                                                <View key={key} style={styles.songCard}>
+                                                <TouchableOpacity
+                                                    key={key}
+                                                    style={styles.songCard}
+                                                    onPress={() => navigation.navigate('SongsDetails', { id: song.id })}
+                                                >
                                                     <View style={styles.songInfo}>
                                                         {song.photo_cover ? (
                                                             <Image source={{ uri: song.photo_cover }} style={styles.albumCover} />
@@ -290,7 +294,7 @@ export default function Search({ navigation }) {
                                                             </Text>
                                                         </View>
                                                     </View>
-                                                </View>
+                                                </TouchableOpacity>
                                             );
                                         })
                                     ) : (

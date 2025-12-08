@@ -7,11 +7,10 @@ import AlbumCard from '../components/albumCard';
 import Radial from '../components/radial';
 import axios from 'axios';
 
-const API_URL_SINGERS = 'http://192.168.0.243:4000/api/singers';
-const API_URL_SONGS = 'http://192.168.0.243:4000/api/songs';
-const API_URL_ALBUMS = 'http://192.168.0.243:4000/api/albums';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:4000/api';
+const SERVER_URL = 'http://192.168.112.1:4000';
 
-export default function Home() {
+export default function Home({ navigation }) {
     const [singers, setSingers] = useState([]);
     const [failedImages, setFailedImages] = useState({});
     const [songs, setSongs] = useState([]);
@@ -20,7 +19,7 @@ export default function Home() {
     useEffect(() => {
         const fetchSingers = async () => {
             try {
-                const response = await axios.get(API_URL_SINGERS);
+                const response = await axios.get(`${API_URL}/singers`);
                 setSingers(response.data);
             } catch (error) {
                 console.log('Erro ao buscar cantores: ', error);
@@ -32,7 +31,7 @@ export default function Home() {
     useEffect(() => {
         const fetchSongs = async () => {
             try {
-                const response = await axios.get(API_URL_SONGS);
+                const response = await axios.get(`${API_URL}/songs`);
                 setSongs(response.data);
             } catch (error) {
                 console.log('Erro ao buscar músicas: ', error);
@@ -44,7 +43,7 @@ export default function Home() {
     useEffect(() => {
         const fetchAlbums = async () => {
             try {
-                const response = await axios.get(API_URL_ALBUMS);
+                const response = await axios.get(`${API_URL}/albums`);
                 setAlbums(response.data);
             } catch (error) {
                 console.log('Erro ao buscar álbuns: ', error);
@@ -86,8 +85,9 @@ export default function Home() {
                     <Text style={styles.sectionTitle}>Álbums</Text>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingRight: 20 }}>
                         {albums.map((album, index) => (
-                            <View
+                            <TouchableOpacity
                                 key={album.id ?? index}
+                                onPress={() => navigation.navigate('Album', { id: album.id })}
                                 style={{
                                     backgroundColor: '#224899',
                                     width: 320,
@@ -127,7 +127,7 @@ export default function Home() {
                                         style={{ width: 80, height: 80, borderRadius: 8 }}
                                     />
                                 </View>
-                            </View>
+                            </TouchableOpacity>
                         ))}
                     </ScrollView>
                 </View>
@@ -168,7 +168,11 @@ export default function Home() {
                 <View style={styles.verticalCards}>
                     <Text style={styles.sectionTitle}>Recomendados para você</Text>
                     {songs.map((song, i) => (
-                        <View key={i} style={styles.musicCard}>
+                        <TouchableOpacity
+                            key={i}
+                            style={styles.musicCard}
+                            onPress={() => navigation.navigate('SongsDetails', { id: song.id })}
+                        >
                             <View style={styles.recommendedThumb} />
                             <View style={{ flexDirection: 'column' }}>
                                 <Text style={{ color: '#fff', fontSize: 13 }}>{song.title}</Text>
@@ -180,7 +184,7 @@ export default function Home() {
                                     <FontAwesome name={likedRecommended[i] ? 'heart' : 'heart-o'} size={24} color={likedRecommended[i] ? 'red' : 'white'} />
                                 </TouchableOpacity>
                             </View>
-                        </View>
+                        </TouchableOpacity>
                     ))}
 
                     {/* {recommended.map((_, i) => (
