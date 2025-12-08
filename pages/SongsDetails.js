@@ -78,7 +78,7 @@ export default function SongsDetails({ route, navigation }) {
                         </TouchableOpacity>
 
                         <Image
-                            source={{ uri: getImageUrl(song?.photo_cover) }}
+                            source={{ uri: getImageUrl(song?.photo_disk) }}
                             style={styles.albumImage}
                         />
 

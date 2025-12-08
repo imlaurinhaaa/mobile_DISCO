@@ -6,10 +6,10 @@ import axios from 'axios';
 
 const API_URL = "http://192.168.0.243:4000/api";
 
+
 import { Ionicons } from '@expo/vector-icons';
 
 export default function Profile({ navigation }) {
-    // Hardcoded user so you can style the profile page without DB inserts
     const user = {
         id: 1,
         name: 'Ana Carolina',
@@ -70,7 +70,6 @@ export default function Profile({ navigation }) {
         fetchAlbuns();
     }, []);
 
-    // Sample playlists
     const playlists = [
         { id: '1', title: 'The best of the bests', photo: 'https://i.pinimg.com/736x/f2/8b/13/f28b1349987d7717a82b6894fe01ed1c.jpg' },
         { id: '2', title: 'Karaoke Vibes', photo: 'https://i.pinimg.com/1200x/c4/ae/3e/c4ae3ecfad0a478cef7464054f6323da.jpg' },
@@ -111,10 +110,12 @@ export default function Profile({ navigation }) {
     );
 
     const renderAlbum = ({ item }) => (
+         <TouchableOpacity style={styles.songRow} onPress={() => navigation.navigate('Album', { song: item })}>
             <View style={styles.playlistCard}>
                 <Image source={{ uri: item.photo_cover }} style={styles.songCover} />
                 <Text style={styles.songTitle}>{item.title}</Text>
             </View>
+            </TouchableOpacity>
     );
 
     return (
@@ -205,11 +206,9 @@ const styles = StyleSheet.create({
     },
     blur: {
         position: 'absolute',
-        // make the gradient a rounded blob
         width: 420,
         height: 420,
         borderRadius: 210,
-        // shift it so it peeks from the top-left
         top: -100,
         left: -80,
         opacity: 0.5,
