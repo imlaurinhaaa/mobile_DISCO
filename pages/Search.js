@@ -3,6 +3,24 @@ import axios from "axios";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Image } from "react-native";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:4000/api';
+const SERVER_URL = process.env.EXPO_PUBLIC_SERVER_URL || 'http://localhost:4000';
+const IMAGE_URL = process.env.EXPO_PUBLIC_IMAGE_URL || 'http://localhost:4000/uploads';
+
+const getImageUrl = (path) => {
+    if (!path) return null;
+    if (path.startsWith('http')) return path;
+
+    // Remove "uploads/" se existir no caminho
+    let cleanPath = path.replace(/\\/g, '/');
+    if (cleanPath.includes('uploads/')) {
+        cleanPath = cleanPath.substring(cleanPath.indexOf('uploads/') + 8);
+    }
+    if (cleanPath.startsWith('/')) {
+        cleanPath = cleanPath.substring(1);
+    }
+
+    return `${IMAGE_URL}/${cleanPath}`;
+};
 
 export default function Search({ navigation }) {
     const [songs, setSongs] = useState([]);
@@ -205,8 +223,14 @@ export default function Search({ navigation }) {
                                     style={styles.resultCard}
                                     onPress={() => navigation.navigate('Singer', { id: singer.id, name: singer.name })}
                                 >
-                                    <Text style={styles.resultTitle}>{singer.name}</Text>
-                                    <Text style={styles.resultSubtitle}>{singer.musical_genre || 'Artista'}</Text>
+                                    <Image 
+                                        source={singer.photo ? { uri: getImageUrl(singer.photo) } : { uri: 'https://i.imgur.com/Rz7fZkG.png' }} 
+                                        style={styles.resultImage} 
+                                    />
+                                    <View style={styles.resultTextContainer}>
+                                        <Text style={styles.resultTitle}>{singer.name}</Text>
+                                        <Text style={styles.resultSubtitle}>{singer.musical_genre || 'Artista'}</Text>
+                                    </View>
                                 </TouchableOpacity>
                             ))}
                         </View>
@@ -221,8 +245,14 @@ export default function Search({ navigation }) {
                                     style={styles.resultCard}
                                     onPress={() => navigation.navigate('Album', { id: album.id })}
                                 >
-                                    <Text style={styles.resultTitle}>{album.title}</Text>
-                                    <Text style={styles.resultSubtitle}>{album.artist}</Text>
+                                    <Image 
+                                        source={album.photo_cover ? { uri: getImageUrl(album.photo_cover) } : { uri: 'https://i.imgur.com/Rz7fZkG.png' }} 
+                                        style={styles.resultImage} 
+                                    />
+                                    <View style={styles.resultTextContainer}>
+                                        <Text style={styles.resultTitle}>{album.title}</Text>
+                                        <Text style={styles.resultSubtitle}>{album.artist}</Text>
+                                    </View>
                                 </TouchableOpacity>
                             ))}
                         </View>
@@ -237,8 +267,14 @@ export default function Search({ navigation }) {
                                     style={styles.resultCard}
                                     onPress={() => navigation.navigate('SongsDetails', { id: song.id })}
                                 >
-                                    <Text style={styles.resultTitle}>{song.title}</Text>
-                                    <Text style={styles.resultSubtitle}>{song.artist}</Text>
+                                    <Image 
+                                        source={song.photo_cover ? { uri: song.photo_cover } : { uri: 'https://i.imgur.com/Rz7fZkG.png' }} 
+                                        style={styles.resultImage} 
+                                    />
+                                    <View style={styles.resultTextContainer}>
+                                        <Text style={styles.resultTitle}>{song.title}</Text>
+                                        <Text style={styles.resultSubtitle}>{song.artist}</Text>
+                                    </View>
                                 </TouchableOpacity>
                             ))}
                         </View>
@@ -312,20 +348,11 @@ export default function Search({ navigation }) {
 
 function formatSongs(arr) {
     return arr.map((s) => {
-        const rawCover = s.photo_cover || s.cover || s.album_cover || null;
-        let coverUrl = null;
-        if (rawCover) {
-            if (typeof rawCover === 'string') {
-                if (/^https?:\/\//i.test(rawCover)) {
-                    coverUrl = rawCover;
-                } else {
-                    coverUrl = `${API_URL.replace(/\/api$/, '')}/uploads/${rawCover}`;
-                }
-            }
-        }
+        // Tenta pegar a capa de várias propriedades possíveis
+        const rawCover = s.photo_cover || s.cover || s.album_cover || s.photo_disk || null;
         return {
             ...s,
-            photo_cover: coverUrl,
+            photo_cover: getImageUrl(rawCover),
         };
     });
 }
@@ -402,12 +429,23 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         marginBottom: 5,
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
+    },
+    resultImage: {
+        width: 50,
+        height: 50,
+        borderRadius: 8,
+        marginRight: 10,
+        backgroundColor: '#333',
+    },
+    resultTextContainer: {
+        flex: 1,
+        justifyContent: 'center',
     },
     resultTitle: {
         color: '#fff',
         flexShrink: 1,
+        fontWeight: 'bold',
     },
     resultSubtitle: {
         fontSize: 12,

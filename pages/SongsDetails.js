@@ -5,30 +5,26 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Defs, RadialGradient, Stop, Rect } from 'react-native-svg';
 import EvilIcons from '@expo/vector-icons/EvilIcons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-const API_URL = "http://192.168.0.243:4000/api";
-const SERVER_URL = "http://192.168.0.243:4000";
+const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://192.168.0.243:4000/api";
+const IMAGE_URL = process.env.EXPO_PUBLIC_IMAGE_URL || "http://192.168.0.243:4000/uploads";
 
 const getImageUrl = (path) => {
+    console.log('getImageUrl chamado com:', path);
     if (!path) return null;
     if (path.startsWith('http')) return path;
-    
-    // Normaliza as barras para o padrão URL
+
+    // Remove "uploads/" se existir no caminho
     let cleanPath = path.replace(/\\/g, '/');
-
-    // Se o caminho já tiver "uploads/", garantimos que pegamos a partir dele
     if (cleanPath.includes('uploads/')) {
-        cleanPath = cleanPath.substring(cleanPath.indexOf('uploads/'));
-    } else if (!cleanPath.startsWith('uploads/')) {
-        // Se não tiver "uploads/", adicionamos (assumindo que a imagem está na pasta uploads)
-        cleanPath = `uploads/${cleanPath}`;
+        cleanPath = cleanPath.substring(cleanPath.indexOf('uploads/') + 8);
     }
-
-    // Remove barra inicial se houver, para evitar duplicidade com SERVER_URL
     if (cleanPath.startsWith('/')) {
         cleanPath = cleanPath.substring(1);
     }
 
-    return `${SERVER_URL}/${cleanPath}`;
+    const finalUrl = `${IMAGE_URL}/${cleanPath}`;
+    console.log('URL gerada:', finalUrl);
+    return finalUrl;
 };
 
 import axios from 'axios';
@@ -40,11 +36,35 @@ export default function SongsDetails({ route, navigation }) {
 
     useEffect(() => {
         if (initialSong?.id) {
+            console.log('Buscando detalhes da música ID:', initialSong.id);
             axios.get(`${API_URL}/songs/${initialSong.id}`)
-                .then(response => {
+                .then(async response => {
                     if (response.data) {
-                        console.log("Dados atualizados da música:", response.data);
-                        setSong(prev => ({ ...prev, ...response.data }));
+                        const songData = response.data.song || response.data;
+                        console.log("Dados da música recebidos:", songData);
+                        
+                        let updatedSong = { ...songData };
+
+                        // Se tiver album_id, busca os dados do álbum para pegar as imagens
+                        if (songData.album_id) {
+                            try {
+                                console.log("Buscando álbum ID:", songData.album_id);
+                                const albumRes = await axios.get(`${API_URL}/albums/${songData.album_id}`);
+                                const albumData = albumRes.data.album || albumRes.data;
+                                console.log("Dados do álbum:", albumData);
+                                
+                                // Usa as imagens do álbum
+                                if (albumData.photo_cover) updatedSong.photo_cover = albumData.photo_cover;
+                                if (albumData.photo_disk) updatedSong.photo_disk = albumData.photo_disk;
+                                // Fallback caso o campo seja apenas 'photo'
+                                if (!updatedSong.photo_cover && albumData.photo) updatedSong.photo_cover = albumData.photo;
+                                
+                            } catch (err) {
+                                console.error("Erro ao buscar álbum:", err);
+                            }
+                        }
+
+                        setSong(prev => ({ ...prev, ...updatedSong }));
                     }
                 })
                 .catch(error => console.error("Erro ao buscar detalhes da música:", error));
@@ -109,7 +129,7 @@ export default function SongsDetails({ route, navigation }) {
                         </View>
                         <View style={styles.card}>
                             <Image
-                                source={{ uri: getImageUrl(song?.photo_disk) }}
+                                source={{ uri: getImageUrl(song?.photo_cover) }}
                                 style={styles.cardImage}
                             />
 

@@ -4,7 +4,24 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Defs, RadialGradient, Stop, Rect } from 'react-native-svg';
 import axios from 'axios';
 
-const API_URL = "http://192.168.0.243:4000/api";
+const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://192.168.0.243:4000/api";
+const IMAGE_URL = process.env.EXPO_PUBLIC_IMAGE_URL || "http://192.168.0.243:4000/uploads";
+
+const getImageUrl = (path) => {
+    if (!path) return null;
+    if (path.startsWith('http')) return path;
+
+    // Remove "uploads/" se existir no caminho
+    let cleanPath = path.replace(/\\/g, '/');
+    if (cleanPath.includes('uploads/')) {
+        cleanPath = cleanPath.substring(cleanPath.indexOf('uploads/') + 8);
+    }
+    if (cleanPath.startsWith('/')) {
+        cleanPath = cleanPath.substring(1);
+    }
+
+    return `${IMAGE_URL}/${cleanPath}`;
+};
 
 
 import { Ionicons } from '@expo/vector-icons';
@@ -93,7 +110,7 @@ export default function Profile({ navigation }) {
     const renderPlaylist = ({ item }) => (
         <View style={styles.playlistCard}>
             {item.photo ? (
-                <Image source={{ uri: item.photo }} style={styles.playlistImage} />
+                <Image source={{ uri: getImageUrl(item.photo) }} style={styles.playlistImage} />
             ) : (
                 <View style={styles.playlistPlaceholder}>
                     <Ionicons name="add" size={34} color="#333" />
@@ -103,19 +120,16 @@ export default function Profile({ navigation }) {
     );
 
     const renderArtist = ({ item }) => (
-        <View style={styles.artistRow}>
-            <Image source={{ uri: item.photo }} style={styles.artistImage} />
+        <TouchableOpacity style={styles.artistRow} onPress={() => navigation.navigate('Singer', { name: item.name, id: item.id })}>
+            <Image source={{ uri: getImageUrl(item.photo) }} style={styles.artistImage} />
             <Text style={styles.artistName}>{item.name}</Text>
-        </View>
+        </TouchableOpacity>
     );
 
     const renderAlbum = ({ item }) => (
-         <TouchableOpacity style={styles.songRow} onPress={() => navigation.navigate('Album', { song: item })}>
-            <View style={styles.playlistCard}>
-                <Image source={{ uri: item.photo_cover }} style={styles.songCover} />
-                <Text style={styles.songTitle}>{item.title}</Text>
-            </View>
-            </TouchableOpacity>
+        <TouchableOpacity style={styles.playlistCard} onPress={() => navigation.navigate('Album', { album: item })}>
+            <Image source={{ uri: getImageUrl(item.photo_cover) }} style={styles.playlistImage} />
+        </TouchableOpacity>
     );
 
     return (
@@ -169,7 +183,7 @@ export default function Profile({ navigation }) {
                             <FlatList
                                 data={artists}
                                 renderItem={renderArtist}
-                                keyExtractor={(artist) => artist.id}
+                                keyExtractor={(artist) => artist.name}
                                 horizontal={true}
                                 showsHorizontalScrollIndicator={false}
                                 contentContainerStyle={styles.artistsList}
