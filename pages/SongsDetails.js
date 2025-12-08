@@ -1,20 +1,62 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Text, Image, TouchableOpacity } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Defs, RadialGradient, Stop, Rect } from 'react-native-svg';
 import EvilIcons from '@expo/vector-icons/EvilIcons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+const API_URL = "http://192.168.0.243:4000/api";
+const SERVER_URL = "http://192.168.0.243:4000";
 
-export default function Album() {
+const getImageUrl = (path) => {
+    if (!path) return null;
+    if (path.startsWith('http')) return path;
+    
+    // Normaliza as barras para o padrão URL
+    let cleanPath = path.replace(/\\/g, '/');
+
+    // Se o caminho já tiver "uploads/", garantimos que pegamos a partir dele
+    if (cleanPath.includes('uploads/')) {
+        cleanPath = cleanPath.substring(cleanPath.indexOf('uploads/'));
+    } else if (!cleanPath.startsWith('uploads/')) {
+        // Se não tiver "uploads/", adicionamos (assumindo que a imagem está na pasta uploads)
+        cleanPath = `uploads/${cleanPath}`;
+    }
+
+    // Remove barra inicial se houver, para evitar duplicidade com SERVER_URL
+    if (cleanPath.startsWith('/')) {
+        cleanPath = cleanPath.substring(1);
+    }
+
+    return `${SERVER_URL}/${cleanPath}`;
+};
+
+import axios from 'axios';
+
+export default function SongsDetails({ route, navigation }) {
+    const { song: initialSong } = route.params || {};
+    const [song, setSong] = useState(initialSong || {});
     const [likedSongs, setLikedSongs] = useState({});
 
-    const toggleLike = (songId) => {
+    useEffect(() => {
+        if (initialSong?.id) {
+            axios.get(`${API_URL}/songs/${initialSong.id}`)
+                .then(response => {
+                    if (response.data) {
+                        console.log("Dados atualizados da música:", response.data);
+                        setSong(prev => ({ ...prev, ...response.data }));
+                    }
+                })
+                .catch(error => console.error("Erro ao buscar detalhes da música:", error));
+        }
+    }, [initialSong?.id]);
+
+    function toggleLike(songId) {
         setLikedSongs((prev) => ({
             ...prev,
             [songId]: !prev[songId],
         }));
-    };
+    }
 
     return (
         <SafeAreaProvider>
@@ -31,24 +73,26 @@ export default function Album() {
 
                 <ScrollView>
                     <View style={styles.container}>
-                        <EvilIcons name="arrow-left" size={30} color="white" style={styles.backIcon} />
+                        <TouchableOpacity onPress={() => navigation.goBack()}>
+                            <EvilIcons name="arrow-left" size={30} color="white" style={styles.backIcon} />
+                        </TouchableOpacity>
 
                         <Image
-                            source={require('../assets/playlistImage.png')}
+                            source={{ uri: getImageUrl(song?.photo_cover) }}
                             style={styles.albumImage}
                         />
 
                         <View style={styles.infoContainer}>
                             <View style={styles.info}>
-                                <Text style={styles.titleAlbum}>Album Title</Text>
-                                <Text style={styles.textAlbum}>Artist Name</Text>
+                                <Text style={styles.titleAlbum}>{song?.title || 'Título'}</Text>
+                                <Text style={styles.textAlbum}>{song?.singer_name || song?.artist || 'Artista'}</Text>
                             </View>
                             <View style={styles.infoAlbum}>
-                                <TouchableOpacity onPress={() => toggleLike(id)}>
+                                <TouchableOpacity onPress={() => toggleLike(song?.id)}>
                                     <FontAwesome
-                                        name={likedSongs[id] ? 'heart' : 'heart-o'}
+                                        name={likedSongs[song?.id] ? 'heart' : 'heart-o'}
                                         size={24}
-                                        color={likedSongs[id] ? 'red' : 'white'}
+                                        color={likedSongs[song?.id] ? 'red' : 'white'}
                                     />
                                 </TouchableOpacity>
                             </View>
@@ -60,22 +104,22 @@ export default function Album() {
                         <View style={styles.lyricsBox}>
                             <Text style={styles.titleLyrics}>LETRA</Text>
                             <Text style={styles.lyrics}>
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                                {song?.lyrics || 'Letra indisponível'}
                             </Text>
                         </View>
                         <View style={styles.card}>
-            <Image
-                source={require('../assets/playlistImage.png')}
-                style={styles.cardImage}
-            />
+                            <Image
+                                source={{ uri: getImageUrl(song?.photo_disk) }}
+                                style={styles.cardImage}
+                            />
 
-            <View style={styles.cardContent}>
-                <Text style={styles.cardTitle}>DESCRIÇÃO</Text>
-                <Text style={styles.cardText}>
-                    Aqui vai o texto da descrição...
-                </Text>
-            </View>
-        </View>
+                            <View style={styles.cardContent}>
+                                <Text style={styles.cardTitle}>DESCRIÇÃO</Text>
+                                <Text style={styles.cardText}>
+                                    {song?.description || 'Sem descrição'}
+                                </Text>
+                            </View>
+                        </View>
                     </View>
                 </ScrollView>
             </SafeAreaView>

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Image } from "react-native";
 
-const API_URL = "http://localhost:4000/api";
+const API_URL = "http://192.168.0.243:4000/api";
 
 export default function Search({ navigation }) {
     const [songs, setSongs] = useState([]);

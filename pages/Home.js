@@ -7,9 +7,9 @@ import AlbumCard from '../components/albumCard';
 import Radial from '../components/radial';
 import axios from 'axios';
 
-const API_URL_SINGERS = 'http://192.168.112.1:4000/api/singers';
-const API_URL_SONGS = 'http://192.168.112.1:4000/api/songs';
-const API_URL_ALBUMS = 'http://192.168.112.1:4000/api/albums';
+const API_URL_SINGERS = 'http://192.168.0.243:4000/api/singers';
+const API_URL_SONGS = 'http://192.168.0.243:4000/api/songs';
+const API_URL_ALBUMS = 'http://192.168.0.243:4000/api/albums';
 
 export default function Home() {
     const [singers, setSingers] = useState([]);
