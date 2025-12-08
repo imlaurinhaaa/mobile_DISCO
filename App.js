@@ -17,7 +17,7 @@ const Stack = createNativeStackNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Profile" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName="SignIn" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Singer" component={Singer} />
         <Stack.Screen name="Profile" component={Profile} />
         <Stack.Screen name="Search" component={Search} />

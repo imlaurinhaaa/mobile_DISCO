@@ -18,7 +18,7 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-const BASE_URL = 'http://192.168.100.171:4000';
+const BASE_URL = 'http://192.168.0.243:4000';
 
 export default function SignIn({ navigation }) {
     const [email, setEmail] = useState('');

@@ -87,12 +87,6 @@ export default function Profile({ navigation }) {
         fetchAlbuns();
     }, []);
 
-    const playlists = [
-        { id: '1', title: 'The best of the bests', photo: 'https://i.pinimg.com/736x/f2/8b/13/f28b1349987d7717a82b6894fe01ed1c.jpg' },
-        { id: '2', title: 'Karaoke Vibes', photo: 'https://i.pinimg.com/1200x/c4/ae/3e/c4ae3ecfad0a478cef7464054f6323da.jpg' },
-        { id: '3', title: 'Nostalgia', photo: 'https://i.pinimg.com/736x/a5/22/ae/a522aedbcc735e48f8d3606bfeb6df2a.jpg' },
-        { id: '4', title: 'Walking in the wind', photo: 'https://i.pinimg.com/736x/a0/74/67/a07467a9c9a8b934079fffd5169162cb.jpg' },
-    ];
 
     const renderFavorite = ({ item }) => (
         <TouchableOpacity style={styles.songRow} onPress={() => navigation.navigate('SongsDetails', { song: item })}>
@@ -107,17 +101,6 @@ export default function Profile({ navigation }) {
         </TouchableOpacity>
     );
 
-    const renderPlaylist = ({ item }) => (
-        <View style={styles.playlistCard}>
-            {item.photo ? (
-                <Image source={{ uri: getImageUrl(item.photo) }} style={styles.playlistImage} />
-            ) : (
-                <View style={styles.playlistPlaceholder}>
-                    <Ionicons name="add" size={34} color="#333" />
-                </View>
-            )}
-        </View>
-    );
 
     const renderArtist = ({ item }) => (
         <TouchableOpacity style={styles.artistRow} onPress={() => navigation.navigate('Singer', { name: item.name, id: item.id })}>
@@ -127,8 +110,8 @@ export default function Profile({ navigation }) {
     );
 
     const renderAlbum = ({ item }) => (
-        <TouchableOpacity style={styles.playlistCard} onPress={() => navigation.navigate('Album', { album: item })}>
-            <Image source={{ uri: getImageUrl(item.photo_cover) }} style={styles.playlistImage} />
+        <TouchableOpacity style={styles.albumCard} onPress={() => navigation.navigate('Album', { album: item })}>
+            <Image source={{ uri: getImageUrl(item.photo_cover) }} style={styles.albumImage} />
         </TouchableOpacity>
     );
 
@@ -162,19 +145,6 @@ export default function Profile({ navigation }) {
                                 renderItem={renderFavorite}
                                 keyExtractor={(item) => item.id}
                                 scrollEnabled={false}
-                            />
-                        </View>
-
-                        <View style={styles.playlistsSection}>
-                            <Text style={styles.sectionTitle}>Suas playlists</Text>
-                            <FlatList
-                                data={playlists}
-                                renderItem={renderPlaylist}
-                                keyExtractor={(item) => item.id}
-                                scrollEnabled={false}
-                                numColumns={2}
-                                columnWrapperStyle={{ gap: 12 }}
-                                style={styles.playlistsList}
                             />
                         </View>
 
@@ -251,9 +221,6 @@ const styles = StyleSheet.create({
     Favssection: {
         marginBottom: 24,
     },
-    playlistsSection: {
-        marginBottom: 24,
-    },
     sectionTitle: {
         color: '#fff',
         fontSize: 20,
@@ -286,18 +253,18 @@ const styles = StyleSheet.create({
         padding: 4,
     },
     
-    playlistCard: {
+    albumCard: {
         width: '48%',
         alignItems: 'center',
         marginBottom: 16,
     },
-    playlistImage: {
+    albumImage: {
         width: 100,
         height: 100,
         borderRadius: 12,
         marginBottom: 8,
     },
-    playlistPlaceholder: {
+    albumPlaceholder: {
         width: 100,
         height: 100,
         borderRadius: 12,
@@ -306,7 +273,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 8,
     },
-    playlistsList: {
+    albumsList: {
         alignContent:'center'
 },
 artistsList: {

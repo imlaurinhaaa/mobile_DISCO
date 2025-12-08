@@ -45,7 +45,6 @@ export default function SongsDetails({ route, navigation }) {
                         
                         let updatedSong = { ...songData };
 
-                        // Se tiver album_id, busca os dados do álbum para pegar as imagens
                         if (songData.album_id) {
                             try {
                                 console.log("Buscando álbum ID:", songData.album_id);
@@ -53,10 +52,8 @@ export default function SongsDetails({ route, navigation }) {
                                 const albumData = albumRes.data.album || albumRes.data;
                                 console.log("Dados do álbum:", albumData);
                                 
-                                // Usa as imagens do álbum
                                 if (albumData.photo_cover) updatedSong.photo_cover = albumData.photo_cover;
                                 if (albumData.photo_disk) updatedSong.photo_disk = albumData.photo_disk;
-                                // Fallback caso o campo seja apenas 'photo'
                                 if (!updatedSong.photo_cover && albumData.photo) updatedSong.photo_cover = albumData.photo;
                                 
                             } catch (err) {
