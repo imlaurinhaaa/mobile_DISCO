@@ -4,7 +4,7 @@ import {
     Text,
     View,
     TextInput,
-    Image, 
+    Image,
     Alert,
     ImageBackground,
     KeyboardAvoidingView,
@@ -20,7 +20,7 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 // URL do backend
-const BASE_URL = 'http://192.168.1.20:4000';
+const BASE_URL = 'http://192.168.15.128:4000';
 
 export default function SignUp({ navigation }) {
     const [name, setName] = useState('');
@@ -71,7 +71,7 @@ export default function SignUp({ navigation }) {
             }
 
             Alert.alert('Sucesso', 'Usuário registrado com sucesso!');
-            navigation.navigate('Home');
+            navigation.navigate('Tabs');
         } catch (error) {
             console.log('Erro ao registrar usuário:', error);
             Alert.alert('Erro', 'Falha na conexão com o servidor.');

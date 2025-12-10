@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Text, Image, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, Image, TouchableOpacity, Modal, Pressable } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Defs, RadialGradient, Stop, Rect } from 'react-native-svg';
 import EvilIcons from '@expo/vector-icons/EvilIcons';
@@ -30,43 +30,53 @@ const getImageUrl = (path) => {
 import axios from 'axios';
 
 export default function SongsDetails({ route, navigation }) {
-    const { song: initialSong } = route.params || {};
+    const { song: initialSong, id: songId } = route.params || {};
     const [song, setSong] = useState(initialSong || {});
     const [likedSongs, setLikedSongs] = useState({});
+    const [lyricsVisible, setLyricsVisible] = useState(false);
 
     useEffect(() => {
-        if (initialSong?.id) {
-            console.log('Buscando detalhes da música ID:', initialSong.id);
-            axios.get(`${API_URL}/songs/${initialSong.id}`)
+        const id = initialSong?.id || songId;
+        if (id) {
+            axios.get(`${API_URL}/songs/${id}`)
                 .then(async response => {
                     if (response.data) {
                         const songData = response.data.song || response.data;
-                        console.log("Dados da música recebidos:", songData);
-                        
+
                         let updatedSong = { ...songData };
+
+                        // Buscar dados do cantor se não tiver singer_name
+                        if (songData.singer_id && !songData.singer_name) {
+                            try {
+                                const singerRes = await axios.get(`${API_URL}/singers/${songData.singer_id}`);
+                                const singerData = singerRes.data.singer || singerRes.data;
+
+                                if (singerData.name) updatedSong.singer_name = singerData.name;
+                            } catch (err) {
+                                console.error("Erro ao buscar cantor:", err);
+                            }
+                        }
 
                         if (songData.album_id) {
                             try {
-                                console.log("Buscando álbum ID:", songData.album_id);
                                 const albumRes = await axios.get(`${API_URL}/albums/${songData.album_id}`);
                                 const albumData = albumRes.data.album || albumRes.data;
-                                console.log("Dados do álbum:", albumData);
-                                
+
                                 if (albumData.photo_cover) updatedSong.photo_cover = albumData.photo_cover;
                                 if (albumData.photo_disk) updatedSong.photo_disk = albumData.photo_disk;
                                 if (!updatedSong.photo_cover && albumData.photo) updatedSong.photo_cover = albumData.photo;
-                                
+
                             } catch (err) {
                                 console.error("Erro ao buscar álbum:", err);
                             }
                         }
 
-                        setSong(prev => ({ ...prev, ...updatedSong }));
+                        setSong(updatedSong);
                     }
                 })
                 .catch(error => console.error("Erro ao buscar detalhes da música:", error));
         }
-    }, [initialSong?.id]);
+    }, [songId, initialSong?.id]);
 
     function toggleLike(songId) {
         setLikedSongs((prev) => ({
@@ -76,35 +86,35 @@ export default function SongsDetails({ route, navigation }) {
     }
 
     return (
-        <SafeAreaProvider>
-            <SafeAreaView style={styles.container}>
-                <Svg style={styles.background} pointerEvents="none" viewBox="0 0 100 100" preserveAspectRatio="none">
-                    <Defs>
-                        <RadialGradient id="radial" cx="50%" cy="30%" rx="50%" ry="50%">
-                            <Stop offset="0%" stopColor="#231385" />
-                            <Stop offset="100%" stopColor="#101027" />
-                        </RadialGradient>
-                    </Defs>
-                    <Rect width="100%" height="100%" fill="url(#radial)" />
-                </Svg>
+        <View style={styles.container}>
+            <Svg style={styles.background} pointerEvents="none" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <Defs>
+                    <RadialGradient id="radial" cx="50%" cy="30%" rx="50%" ry="50%">
+                        <Stop offset="0%" stopColor="#231385" />
+                        <Stop offset="100%" stopColor="#101027" />
+                    </RadialGradient>
+                </Defs>
+                <Rect width="100%" height="100%" fill="url(#radial)" />
+            </Svg>
 
-                <ScrollView>
-                    <View style={styles.container}>
-                        <TouchableOpacity onPress={() => navigation.goBack()}>
-                            <EvilIcons name="arrow-left" size={30} color="white" style={styles.backIcon} />
-                        </TouchableOpacity>
+            <ScrollView contentContainerStyle={{ paddingBottom: 120, paddingTop: 40 }}>
+                <View>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
+                        <EvilIcons name="arrow-left" size={30} color="white" style={styles.backIcon} />
+                    </TouchableOpacity>
 
-                        <Image
-                            source={{ uri: getImageUrl(song?.photo_disk) }}
-                            style={styles.albumImage}
-                        />
+                    <Image
+                        source={{ uri: getImageUrl(song?.photo_disk) }}
+                        style={styles.albumImage}
+                    />
 
-                        <View style={styles.infoContainer}>
-                            <View style={styles.info}>
-                                <Text style={styles.titleAlbum}>{song?.title || 'Título'}</Text>
-                                <Text style={styles.textAlbum}>{song?.singer_name || song?.artist || 'Artista'}</Text>
-                            </View>
-                            <View style={styles.infoAlbum}>
+                    <View style={styles.infoContainer}>
+                        <View style={styles.info}>
+                            <Text style={styles.titleAlbum}>{song?.title || 'Título'}</Text>
+                            <Text style={styles.textAlbum}>{song?.singer_name || song?.artist || 'Artista desconhecido'}</Text>
+                        </View>
+                        <View style={styles.infoAlbum}>
+                            <View style={styles.likeWrapper}>
                                 <TouchableOpacity onPress={() => toggleLike(song?.id)}>
                                     <FontAwesome
                                         name={likedSongs[song?.id] ? 'heart' : 'heart-o'}
@@ -112,49 +122,74 @@ export default function SongsDetails({ route, navigation }) {
                                         color={likedSongs[song?.id] ? 'red' : 'white'}
                                     />
                                 </TouchableOpacity>
-                            </View>
-                        </View>
-                        <Image
-                            source={require('../assets/img/player.png')}
-                            style={styles.player}
-                        />
-                        <View style={styles.lyricsBox}>
-                            <Text style={styles.titleLyrics}>LETRA</Text>
-                            <Text style={styles.lyrics}>
-                                {song?.lyrics || 'Letra indisponível'}
-                            </Text>
-                        </View>
-                        <View style={styles.card}>
-                            <Image
-                                source={{ uri: getImageUrl(song?.photo_cover) }}
-                                style={styles.cardImage}
-                            />
-
-                            <View style={styles.cardContent}>
-                                <Text style={styles.cardTitle}>DESCRIÇÃO</Text>
-                                <Text style={styles.cardText}>
-                                    {song?.description || 'Sem descrição'}
-                                </Text>
+                                <Text style={styles.durationText}>{song?.duration || ''}</Text>
                             </View>
                         </View>
                     </View>
-                </ScrollView>
-            </SafeAreaView>
-        </SafeAreaProvider>
+                    <Image
+                        source={require('../assets/img/player.png')}
+                        style={styles.player}
+                    />
+                    <View style={styles.lyricsBox}>
+                        <Text style={styles.titleLyrics}>LETRA</Text>
+                        <Text style={styles.lyricsPreview} numberOfLines={4} ellipsizeMode="tail">
+                            {song?.lyrics || 'Letra indisponível'}
+                        </Text>
+                        {song?.lyrics ? (
+                            <TouchableOpacity style={styles.showMoreBtn} onPress={() => setLyricsVisible(true)}>
+                                <Text style={styles.showMoreText}>Ver letra completa</Text>
+                            </TouchableOpacity>
+                        ) : null}
+                    </View>
+
+                    <Modal
+                        visible={lyricsVisible}
+                        animationType="slide"
+                        transparent
+                        onRequestClose={() => setLyricsVisible(false)}
+                    >
+                        <Pressable style={styles.modalBackdrop} onPress={() => setLyricsVisible(false)}>
+                            <Pressable style={styles.modalContent}>
+                                <Text style={styles.modalTitle}>Letra completa</Text>
+                                <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
+                                    <Text style={styles.modalLyrics}>{song?.lyrics || 'Letra indisponível'}</Text>
+                                </ScrollView>
+                                <TouchableOpacity style={styles.closeBtn} onPress={() => setLyricsVisible(false)}>
+                                    <Text style={styles.closeBtnText}>Fechar</Text>
+                                </TouchableOpacity>
+                            </Pressable>
+                        </Pressable>
+                    </Modal>
+                    <View style={styles.card}>
+                        <Image
+                            source={{ uri: getImageUrl(song?.photo_cover) }}
+                            style={styles.cardImage}
+                        />
+
+                        <View style={styles.cardContent}>
+                            <Text style={styles.cardTitle}>DESCRIÇÃO</Text>
+                            <Text style={styles.cardText}>
+                                {song?.description || 'Sem descrição'}
+                            </Text>
+                        </View>
+                    </View>
+                </View>
+            </ScrollView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0a0a1a',
+        backgroundColor: '#101027',
     },
     background: {
         position: 'absolute',
-        width: '100%',
-        height: '40%',
         top: 0,
         left: 0,
+        width: '100%',
+        height: '100%',
         zIndex: -1,
     },
     backIcon: {
@@ -194,6 +229,16 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         gap: 16,
     },
+    likeWrapper: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 6,
+    },
+    durationText: {
+        color: '#b0b0c3',
+        fontSize: 12,
+        fontWeight: '500',
+    },
     textInfo: {
         fontSize: 14,
         color: '#8080a0',
@@ -217,47 +262,96 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         minHeight: 200,
     },
+    lyricsPreview: {
+        marginTop: 10,
+        fontSize: 16,
+        color: '#00003C',
+        textAlign: 'left',
+    },
     titleLyrics: {
         fontSize: 20,
         fontWeight: 'bold',
         color: '#00003C',
         textAlign: 'left',
     },
-    lyrics: {
-        marginTop: 10,
-        fontSize: 16,
-        color: '#00003C',
-        textAlign: 'left',
+    showMoreBtn: {
+        marginTop: 12,
+        alignSelf: 'flex-start',
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 8,
+        backgroundColor: '#0A0835',
+    },
+    showMoreText: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    modalBackdrop: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        justifyContent: 'flex-end',
+    },
+    modalContent: {
+        backgroundColor: '#0F1027',
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        padding: 20,
+        maxHeight: '75%',
+    },
+    modalTitle: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: '700',
+        marginBottom: 12,
+    },
+    modalLyrics: {
+        color: '#E0E0F0',
+        fontSize: 15,
+        lineHeight: 22,
+    },
+    closeBtn: {
+        marginTop: 16,
+        alignSelf: 'center',
+        paddingVertical: 10,
+        paddingHorizontal: 24,
+        borderRadius: 10,
+        backgroundColor: '#7A3CF0',
+    },
+    closeBtnText: {
+        color: '#fff',
+        fontSize: 15,
+        fontWeight: '600',
     },
     card: {
-    width: '90%',
-    backgroundColor: '#F7F9FF',
-    borderRadius: 20,
-    overflow: 'hidden',
-    alignSelf: 'center',
-    marginTop: 40,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-},
-cardImage: {
-    width: '100%',
-    height: 140,
-},
-cardContent: {
-    padding: 15,
-},
-cardTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#00003C',
-    marginBottom: 10,
-},
-cardText: {
-    fontSize: 15,
-    color: '#00003C',
-},
+        width: '90%',
+        backgroundColor: '#F7F9FF',
+        borderRadius: 20,
+        overflow: 'hidden',
+        alignSelf: 'center',
+        marginTop: 40,
+        marginBottom: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 6,
+    },
+    cardImage: {
+        width: '100%',
+        height: 140,
+    },
+    cardContent: {
+        padding: 15,
+    },
+    cardTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#00003C',
+        marginBottom: 10,
+    },
+    cardText: {
+        fontSize: 15,
+        color: '#00003C',
+    },
 });

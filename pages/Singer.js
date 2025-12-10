@@ -242,13 +242,14 @@ const styles = StyleSheet.create({
         fontSize: 26,
         fontWeight: 'bold',
         color: '#fff',
+        marginBottom: 8,
     },
     badge: {
         alignSelf: 'flex-start',
         paddingHorizontal: 12,
         paddingVertical: 6,
         borderRadius: 20,
-        marginTop: 5,
+        backgroundColor: '#7A3CF0',
     },
     badgeText: {
         color: '#fff',
@@ -260,7 +261,7 @@ const styles = StyleSheet.create({
     },
     content: {
         paddingHorizontal: 20,
-        marginTop: -40,
+        marginTop: -55,
         flex: 1,
     },
     sectionTitle: {

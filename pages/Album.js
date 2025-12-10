@@ -58,6 +58,18 @@ export default function Album({ route, navigation }) {
             try {
                 const albumRes = await axios.get(`${API_URL}/albums/${albumId}`);
                 const albumData = albumRes.data?.album || albumRes.data || {};
+
+                // Buscar dados do cantor se não tiver singer_name
+                if (albumData.singer_id && !albumData.singer_name) {
+                    try {
+                        const singerRes = await axios.get(`${API_URL}/singers/${albumData.singer_id}`);
+                        const singerData = singerRes.data.singer || singerRes.data;
+                        if (singerData.name) albumData.singer_name = singerData.name;
+                    } catch (err) {
+                        console.error("Erro ao buscar cantor:", err);
+                    }
+                }
+
                 setAlbum(albumData);
 
                 let songsData = [];
@@ -82,7 +94,23 @@ export default function Album({ route, navigation }) {
                     songsData = [];
                 }
 
-                setSongs(formatSongs(songsData));
+                // Buscar nome do cantor para músicas que não têm
+                const songsWithSinger = await Promise.all(
+                    songsData.map(async (song) => {
+                        if (song.singer_id && !song.singer_name) {
+                            try {
+                                const singerRes = await axios.get(`${API_URL}/singers/${song.singer_id}`);
+                                const singerData = singerRes.data.singer || singerRes.data;
+                                return { ...song, singer_name: singerData.name };
+                            } catch {
+                                return song;
+                            }
+                        }
+                        return song;
+                    })
+                );
+
+                setSongs(formatSongs(songsWithSinger));
             } catch (err) {
                 setAlbum(null);
                 setSongs([]);

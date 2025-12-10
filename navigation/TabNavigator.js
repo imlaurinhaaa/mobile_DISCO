@@ -1,5 +1,6 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { LinearGradient } from "expo-linear-gradient";
 import Octicons from '@expo/vector-icons/Octicons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
@@ -8,8 +9,45 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Home from "../pages/Home.js";
 import Profile from "../pages/Profile.js";
 import Search from "../pages/Search.js";
+import Singer from "../pages/Singer.js";
+import Album from "../pages/Album.js";
+import SongsDetails from "../pages/SongsDetails.js";
 
 const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
+
+function HomeStack() {
+    return (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="HomeScreen" component={Home} />
+            <Stack.Screen name="Singer" component={Singer} />
+            <Stack.Screen name="Album" component={Album} />
+            <Stack.Screen name="SongsDetails" component={SongsDetails} />
+        </Stack.Navigator>
+    );
+}
+
+function SearchStack() {
+    return (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="SearchScreen" component={Search} />
+            <Stack.Screen name="Singer" component={Singer} />
+            <Stack.Screen name="Album" component={Album} />
+            <Stack.Screen name="SongsDetails" component={SongsDetails} />
+        </Stack.Navigator>
+    );
+}
+
+function ProfileStack() {
+    return (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="ProfileScreen" component={Profile} />
+            <Stack.Screen name="Singer" component={Singer} />
+            <Stack.Screen name="Album" component={Album} />
+            <Stack.Screen name="SongsDetails" component={SongsDetails} />
+        </Stack.Navigator>
+    );
+}
 
 export default function TabNavigator() {
     return (
@@ -50,7 +88,7 @@ export default function TabNavigator() {
         >
             <Tab.Screen
                 name="Home"
-                component={Home}
+                component={HomeStack}
                 options={{
                     tabBarIcon: ({ focused }) => (
                         <Octicons
@@ -64,7 +102,7 @@ export default function TabNavigator() {
 
             <Tab.Screen
                 name="Search"
-                component={Search}
+                component={SearchStack}
                 options={{
                     tabBarIcon: ({ focused }) => (
                         <Octicons
@@ -78,7 +116,7 @@ export default function TabNavigator() {
 
             <Tab.Screen
                 name="Profile"
-                component={Profile}
+                component={ProfileStack}
                 options={{
                     tabBarIcon: ({ focused }) => (
                         <FontAwesome6

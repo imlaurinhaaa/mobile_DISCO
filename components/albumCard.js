@@ -7,10 +7,11 @@ export default function AlbumCard({
     title,
     artist,
     image,
+    photo_cover,
     color = "#224899",
     onPress,
     liked = false,
-    onLikePress
+    onLikePress,
 }) {
     return (
         <TouchableOpacity
@@ -36,8 +37,9 @@ export default function AlbumCard({
 
             <View style={styles.imageWrapper}>
                 <Image
-                    source={image ? { uri: image } : require("../assets/img/sabrina.png")}
+                    source={(photo_cover || image) ? { uri: photo_cover || image } : require("../assets/img/logo.png")}
                     style={styles.image}
+                    resizeMode="cover"
                 />
             </View>
         </TouchableOpacity>
@@ -79,6 +81,7 @@ const styles = StyleSheet.create({
     imageWrapper: {
         width: 80,
         height: 80,
+        borderRadius: 8,
     },
     image: {
         width: 80,

@@ -16,10 +16,11 @@ import * as Font from 'expo-font';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-const BASE_URL = 'http://192.168.1.20:4000';
+const BASE_URL = 'http://192.168.15.128:4000';
 
 export default function SignIn({ navigation }) {
     const [email, setEmail] = useState('');
@@ -55,25 +56,53 @@ export default function SignIn({ navigation }) {
         }
 
         try {
-            const response = await fetch(`${BASE_URL}/api/user/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
+            console.log('=== TENTANDO LOGIN ===');
+            console.log('Email:', email);
+
+            // Endpoint correto do backend
+            let url = `${BASE_URL}/api/user/login`;
+            console.log('URL:', url);
+
+            let response = await Promise.race([
+                fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                }),
+                new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Timeout')), 5000)
+                )
+            ]);
+
+            console.log('Status:', response.status);
 
             const data = await response.json();
+            console.log('Resposta completa:', JSON.stringify(data, null, 2));
 
             if (!response.ok) {
-                Alert.alert("Erro", data.error || "Falha no login.");
+                console.log('Erro no login:', data);
+                Alert.alert("Erro", data.error || data.message || "Falha no login.");
                 return;
             }
 
-            Alert.alert("Sucesso", `Bem-vindo, ${data.user.name}!`);
-            navigation.navigate("Home");
+            console.log('Login bem-sucedido! Navegando para Tabs...');
+            const userName = data.user?.name || data.name || 'Usuário';
+
+            // Salvar dados do usuário no AsyncStorage
+            await AsyncStorage.setItem('userData', JSON.stringify(data.user || data));
+            console.log('Dados do usuário salvos:', data.user || data);
+
+            navigation.navigate("Tabs");
+
+            setTimeout(() => {
+                Alert.alert("Sucesso", `Bem-vindo, ${userName}!`);
+            }, 500);
 
         } catch (error) {
-            console.log("Erro ao conectar com servidor:", error);
-            Alert.alert("Erro", "Não foi possível conectar ao servidor.");
+            console.log("ERRO CATCH:", error.message || error);
+            Alert.alert("Erro", error.message === 'Timeout'
+                ? "Servidor não respondeu. Verifique se o backend está rodando."
+                : "Não foi possível conectar ao servidor.");
         }
     };
 

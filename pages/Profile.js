@@ -1,8 +1,11 @@
-import React, { useState, useEffect, use } from 'react';
-import { View, StyleSheet, ScrollView, Text, Image, TouchableOpacity, FlatList } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, ScrollView, Text, Image, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Defs, RadialGradient, Stop, Rect } from 'react-native-svg';
 import axios from 'axios';
+import * as ImagePicker from 'expo-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://192.168.0.243:4000/api";
 const IMAGE_URL = process.env.EXPO_PUBLIC_IMAGE_URL || "http://192.168.0.243:4000/uploads";
@@ -27,16 +30,80 @@ const getImageUrl = (path) => {
 import { Ionicons } from '@expo/vector-icons';
 
 export default function Profile({ navigation }) {
-    const user = {
-        id: 1,
-        name: 'Ana Carolina',
-        email: 'ana.carolina@example.com',
-        photo: 'https://avatars.githubusercontent.com/u/158210617?v=4'
-    };
-
+    const [user, setUser] = useState(null);
     const [favorites, setFavorites] = useState([]);
     const [artists, setArtists] = useState([]);
     const [albuns, setAlbuns] = useState([]);
+
+    const fetchUserData = async () => {
+        try {
+            // Buscar dados do usuário logado do AsyncStorage
+            const userDataStr = await AsyncStorage.getItem('userData');
+            console.log('Dados do AsyncStorage:', userDataStr);
+
+            if (userDataStr) {
+                const userData = JSON.parse(userDataStr);
+                console.log('Usuário recuperado:', userData);
+                setUser(userData);
+            } else {
+                // Fallback se não houver dados salvos
+                console.log('Nenhum usuário logado');
+                setUser({
+                    id: 1,
+                    name: 'Usuário',
+                    email: 'user@example.com',
+                    photo: null
+                });
+            }
+        } catch (error) {
+            console.error('Erro ao buscar dados do usuário:', error);
+            setUser({
+                id: 1,
+                name: 'Usuário',
+                email: 'user@example.com',
+                photo: null
+            });
+        }
+    };
+
+    // Atualizar dados quando a tela ganhar foco
+    useFocusEffect(
+        React.useCallback(() => {
+            fetchUserData();
+        }, [])
+    );
+
+    useEffect(() => {
+        fetchUserData();
+    }, []);
+
+    const pickImage = async () => {
+        // Pedir permissão para acessar a galeria
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+        if (status !== 'granted') {
+            Alert.alert('Permissão necessária', 'Precisamos de permissão para acessar suas fotos!');
+            return;
+        }
+
+        // Abrir seletor de imagem
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.8,
+        });
+
+        if (!result.canceled && result.assets && result.assets[0]) {
+            const imageUri = result.assets[0].uri;
+
+            // Atualizar foto do usuário localmente
+            setUser(prev => ({ ...prev, photo: imageUri }));
+
+            // TODO: Fazer upload da imagem para o servidor
+            // uploadProfilePhoto(imageUri);
+        }
+    };
 
     useEffect(() => {
         const fetchFavorites = async () => {
@@ -110,7 +177,7 @@ export default function Profile({ navigation }) {
     );
 
     const renderAlbum = ({ item }) => (
-        <TouchableOpacity style={styles.albumCard} onPress={() => navigation.navigate('Album', { album: item })}>
+        <TouchableOpacity style={styles.albumCard} onPress={() => navigation.navigate('Album', { id: item.id })}>
             <Image source={{ uri: getImageUrl(item.photo_cover) }} style={styles.albumImage} />
         </TouchableOpacity>
     );
@@ -134,8 +201,19 @@ export default function Profile({ navigation }) {
                     </Svg>
                     <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                         <View style={styles.profileHeader}>
-                            <Image source={{ uri: user.photo }} style={styles.profileImage} />
-                            <Text style={styles.profileName}>Hi, <Text style={styles.profileNameBold}>{user.name}</Text></Text>
+                            <TouchableOpacity style={styles.profileImageContainer} onPress={pickImage}>
+                                {user?.photo ? (
+                                    <Image source={{ uri: user.photo.startsWith('file://') || user.photo.startsWith('http') ? user.photo : getImageUrl(user.photo) }} style={styles.profileImage} />
+                                ) : (
+                                    <View style={styles.profileImagePlaceholder}>
+                                        <Ionicons name="person" size={50} color="#b0b0c3" />
+                                    </View>
+                                )}
+                                <View style={styles.editPhotoButton}>
+                                    <Ionicons name="camera" size={16} color="#fff" />
+                                </View>
+                            </TouchableOpacity>
+                            <Text style={styles.profileName}>Olá, <Text style={styles.profileNameBold}>{user?.name || 'Usuário'}</Text></Text>
                         </View>
 
                         <View style={styles.Favssection}>
@@ -171,7 +249,7 @@ export default function Profile({ navigation }) {
                                 columnWrapperStyle={{ gap: 12 }}
                                 style={styles.albunsList}
                             />
-                            </View>
+                        </View>
                     </ScrollView>
                 </View>
             </SafeAreaView>
@@ -205,11 +283,35 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
         marginBottom: 24,
     },
+    profileImageContainer: {
+        position: 'relative',
+        marginBottom: 12,
+    },
     profileImage: {
         width: 70,
         height: 70,
-        borderRadius: 100,
-        marginBottom: 12,
+        borderRadius: 35,
+    },
+    profileImagePlaceholder: {
+        width: 70,
+        height: 70,
+        borderRadius: 35,
+        backgroundColor: '#2A2A4A',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    editPhotoButton: {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        backgroundColor: '#7A3CF0',
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: '#101027',
     },
     profileName: {
         color: '#fff',
@@ -252,7 +354,7 @@ const styles = StyleSheet.create({
     heartButton: {
         padding: 4,
     },
-    
+
     albumCard: {
         width: '48%',
         alignItems: 'center',
@@ -274,11 +376,11 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     albumsList: {
-        alignContent:'center'
-},
-artistsList: {
-    paddingLeft: 0,
-},
+        alignContent: 'center'
+    },
+    artistsList: {
+        paddingLeft: 0,
+    },
     artistRow: {
         alignItems: 'center',
         marginRight: 16,
@@ -298,7 +400,7 @@ artistsList: {
         marginTop: 24,
     },
     albunsList: {
-        alignContent:'center'
+        alignContent: 'center'
     },
     songCover: {
         width: 100,
