@@ -1,58 +1,88 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import React from "react";
+import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 
-export default function AlbumCard({ albumName, artistName, isLiked, onLikeToggle }) {
-    const [likedAlbums, setLikedAlbums] = useState({});
-    const toggleAlbumLike = (i) => {
-        setLikedAlbums(prev => ({ ...prev, [i]: !prev[i] }));
-    };
+export default function AlbumCard({
+    title,
+    artist,
+    image,
+    color = "#224899",
+    onPress,
+    liked = false,
+    onLikePress
+}) {
     return (
+        <TouchableOpacity
+            onPress={onPress}
+            style={[styles.container, { backgroundColor: color }]}
+        >
+            <View style={styles.contentWrapper}>
+                <Text style={styles.title}>{title}</Text>
+                <Text style={styles.artist}>{artist}</Text>
 
-        <View style={styles.card}>
-            <View style={styles.textArea}>
-                <Text style={{ color: 'white', fontSize: 18 }}>Nome do Álbum</Text>
-                <Text style={{ color: 'white' }}>Nome da Cantora</Text>
-                <View style={styles.icons}>
-                    <Ionicons name="play-circle-sharp" size={24} color="#09054F" />
-                    <TouchableOpacity onPress={() => toggleAlbumLike(0)}>
-                        <FontAwesome name={likedAlbums[0] ? 'heart' : 'heart-o'} size={20} color={likedAlbums[0] ? 'red' : 'white'} />
+                <View style={styles.controlsContainer}>
+                    <Ionicons name="play-circle-sharp" size={24} color="#ffffffff" />
+
+                    <TouchableOpacity onPress={onLikePress}>
+                        <FontAwesome
+                            name={liked ? "heart" : "heart-o"}
+                            size={20}
+                            color={liked ? "red" : "white"}
+                        />
                     </TouchableOpacity>
                 </View>
             </View>
-            <View style={styles.imageArea}>
-                <Image 
-                    source={require("../assets/img/artists.png")}
+
+            <View style={styles.imageWrapper}>
+                <Image
+                    source={image ? { uri: image } : require("../assets/img/sabrina.png")}
+                    style={styles.image}
                 />
             </View>
-        </View>
-    )
+        </TouchableOpacity>
+    );
 }
 
 const styles = StyleSheet.create({
-    card: {
-        backgroundColor: '#224899',
+    container: {
         width: 320,
         height: 130,
         padding: 20,
         borderRadius: 10,
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexDirection: 'row',
+        alignItems: "center",
+        justifyContent: "space-between",
+        flexDirection: "row",
         marginRight: 12,
         gap: 10,
     },
-    textArea: {
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'flex-start',
+    contentWrapper: {
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "flex-start",
     },
-    icons: {
-        flexDirection: 'row',
+    title: {
+        color: "white",
+        fontSize: 18,
+        fontWeight: "500",
+    },
+    artist: {
+        color: "white",
+        opacity: 0.8,
+    },
+    controlsContainer: {
+        flexDirection: "row",
         gap: 10,
         marginTop: 15,
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: "center",
+    },
+    imageWrapper: {
+        width: 80,
+        height: 80,
+    },
+    image: {
+        width: 80,
+        height: 80,
+        borderRadius: 8,
     },
 });

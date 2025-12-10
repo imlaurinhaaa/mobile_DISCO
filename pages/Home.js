@@ -8,6 +8,7 @@ import Radial from '../components/radial';
 import axios from 'axios';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:4000/api';
+const IMAGE_URL = process.env.EXPO_PUBLIC_IMAGE_URL || 'http://localhost:4000/uploads';
 const SERVER_URL = 'http://192.168.112.1:4000';
 
 export default function Home({ navigation }) {
@@ -83,54 +84,29 @@ export default function Home({ navigation }) {
                 </View>
                 <View style={styles.horizontalCards}>
                     <Text style={styles.sectionTitle}>Álbums</Text>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingRight: 20 }}>
+
+                    <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={{ paddingRight: 20 }}
+                    >
                         {albums.map((album, index) => (
-                            <TouchableOpacity
-                                key={album.id ?? index}
-                                onPress={() => navigation.navigate('Album', { id: album.id })}
-                                style={{
-                                    backgroundColor: '#224899',
-                                    width: 320,
-                                    height: 130,
-                                    padding: 20,
-                                    borderRadius: 10,
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    flexDirection: 'row',
-                                    marginRight: 12,
-                                    gap: 10
-                                }}
-                            >
-                                <View style={{
-                                    flexDirection: 'column',
-                                    justifyContent: 'center',
-                                    alignItems: 'flex-start'
-                                }}>
-                                    <Text style={{ color: 'white', fontSize: 18 }}>{album.title}</Text>
-                                    <Text style={{ color: 'white' }}>{album.singer_name || album.artist || 'Nome da Cantora'}</Text>
-                                    <View style={{
-                                        flexDirection: 'row',
-                                        gap: 10,
-                                        marginTop: 15,
-                                        alignItems: 'center',
-                                        justifyContent: 'center'
-                                    }}>
-                                        <Ionicons name="play-circle-sharp" size={24} color="#09054F" />
-                                        <TouchableOpacity style={{ marginLeft: 8 }} onPress={() => toggleAlbumLike(index)}>
-                                            <FontAwesome name={likedAlbums[index] ? 'heart' : 'heart-o'} size={20} color={likedAlbums[index] ? 'red' : 'white'} />
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                                <View style={{ width: 80, height: 80 }}>
-                                    <Image
-                                        source={album.image ? { uri: album.image } : require("../assets/img/artists.png")}
-                                        style={{ width: 80, height: 80, borderRadius: 8 }}
-                                    />
-                                </View>
-                            </TouchableOpacity>
+                            <AlbumCard
+                                key={album.id ?? index}   // → AQUI!!!
+                                title={album.title}
+                                artist={album.singer_name}
+                                image={album.image}
+                                color="#1A3DBE"
+                                liked={likedAlbums[index]}
+                                onLikePress={() => toggleAlbumLike(index)}
+                                onPress={() => navigation.navigate("Album", { id: album.id })}
+                            />
+                            
                         ))}
+
                     </ScrollView>
                 </View>
+
                 <View style={styles.horizontalCards}>
                     <Text style={styles.sectionTitle}>Artistas em Destaque</Text>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingRight: 20 }}>
@@ -139,16 +115,17 @@ export default function Home({ navigation }) {
                                 ? (typeof singer.photo === 'string' && (singer.photo.startsWith('http://') || singer.photo.startsWith('https://'))
                                     ? singer.photo
                                     : singer.photo.includes('.')
-                                        ? `http://192.168.112.1:4000/uploads/${singer.photo}`
-                                        : `http://192.168.112.1:4000/uploads/${singer.photo}.jpg`)
+                                        ? `${IMAGE_URL}/${singer.photo}`
+                                        : `${IMAGE_URL}/${singer.photo}.jpg`)
                                 : null;
 
                             const showRemote = imageUrl && !failedImages[index];
 
                             return (
-                                <View
+                                <TouchableOpacity
                                     style={{ width: 100, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginRight: 12 }}
                                     key={singer.id ?? index}
+                                    onPress={() => navigation.navigate('Singer', { id: singer.id, name: singer.name })}
                                 >
                                     <Image
                                         source={showRemote ? { uri: imageUrl } : require('../assets/img/artist.png')}
@@ -160,7 +137,7 @@ export default function Home({ navigation }) {
                                         }}
                                     />
                                     <Text style={{ color: '#fff', marginTop: 6, width: 100, textAlign: 'center' }}>{singer.name}</Text>
-                                </View>
+                                </TouchableOpacity>
                             );
                         })}
                     </ScrollView>
@@ -173,7 +150,7 @@ export default function Home({ navigation }) {
                             style={styles.musicCard}
                             onPress={() => navigation.navigate('SongsDetails', { id: song.id })}
                         >
-                            <View style={styles.recommendedThumb} />
+                            <Image source={{ uri: song.photo_cover }} style={styles.albumCover} />
                             <View style={{ flexDirection: 'column' }}>
                                 <Text style={{ color: '#fff', fontSize: 13 }}>{song.title}</Text>
                                 <Text style={{ color: '#CACACA', fontSize: 10 }}>{song.duration}</Text>
@@ -251,7 +228,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
-    recommendedThumb: {
+    image: {
         height: 50,
         width: 50,
         backgroundColor: '#09054F',
