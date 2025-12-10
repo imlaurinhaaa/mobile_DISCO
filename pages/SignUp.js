@@ -4,6 +4,7 @@ import {
     Text,
     View,
     TextInput,
+    Image, 
     Alert,
     ImageBackground,
     KeyboardAvoidingView,
@@ -19,7 +20,7 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 // URL do backend
-const BASE_URL = 'http://192.168.0.243:4000';
+const BASE_URL = 'http://192.168.1.20:4000';
 
 export default function SignUp({ navigation }) {
     const [name, setName] = useState('');
@@ -96,6 +97,7 @@ export default function SignUp({ navigation }) {
                     style={styles.keyboardView}
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 >
+                    <Image source={require('../assets/img/logo.png')} style={styles.logo} />
                     <View style={styles.contentContainer}>
                         <TextInput
                             style={styles.input}
@@ -192,6 +194,15 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-start',
         paddingHorizontal: 20,
         paddingVertical: 28,
+    },
+
+    logo: {
+        width: screenWidth * 0.8,
+        height: screenHeight * 0.3,
+        resizeMode: 'contain',
+        position: 'absolute',
+        top: 60,
+        left: '10%',
     },
 
     contentContainer: {

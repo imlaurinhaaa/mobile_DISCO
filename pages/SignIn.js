@@ -2,6 +2,7 @@ import {
     StyleSheet,
     Text,
     View,
+    Image,
     TextInput,
     Alert,
     ImageBackground,
@@ -18,7 +19,7 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-const BASE_URL = 'http://192.168.0.243:4000';
+const BASE_URL = 'http://192.168.1.20:4000';
 
 export default function SignIn({ navigation }) {
     const [email, setEmail] = useState('');
@@ -98,6 +99,7 @@ export default function SignIn({ navigation }) {
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                     keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
                 >
+                    <Image source={require('../assets/img/logo.png')} style={styles.logo} />
                     <View style={styles.contentContainer}>
 
                         <TextInput
@@ -189,6 +191,15 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-start',
         paddingHorizontal: 20,
         paddingVertical: 28,
+    },
+
+    logo: {
+        width: screenWidth * 0.8,
+        height: screenHeight * 0.3,
+        resizeMode: 'contain',
+        position: 'absolute',
+        top: 80,
+        left: '10%',
     },
 
     contentContainer: {
