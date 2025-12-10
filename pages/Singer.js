@@ -115,7 +115,7 @@ export default function SingerScreen({ route, navigation }) {
 
     if (loading) {
         return (
-            <View style={styles.conntainer}>
+            <View style={styles.container}>
                 <ActivityIndicator size="large" color="#7A3CF0" style={{ marginTop: 50 }} />
             </View>
         );
